@@ -1,0 +1,31 @@
+{
+  "categories": [],
+  "products": [
+    {
+      "cat": "",
+      "name": "خاتم فضة نسائي رقيق",
+      "price": "3200 دج",
+      "images": [],
+      "inStock": true,
+      "sizes": [
+        {
+          "name": "15",
+          "stock": true
+        },
+        {
+          "name": "16",
+          "stock": true
+        },
+        {
+          "name": "17",
+          "stock": true
+        },
+        {
+          "name": "18",
+          "stock": true
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-08-28T00:00:00.000Z"
+}
