@@ -527,6 +527,156 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 #filterPage.visible, #resultsPage.visible { display: block !important; }
 #admin { display: none; }
 #admin.active { display: block; }
+
+/* ===== CENTER + MOBILE FIXES ===== */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.nav-inner {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  justify-content: space-between;
+}
+.logo {
+  margin-left: 0;
+  margin-inline-start: 0;
+}
+.filter-wrap {
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+.admin-wrap {
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+.results-head,
+.section {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+#resultsGrid.grid,
+.grid {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.size-grid, .cat-grid {
+  justify-content: center;
+}
+#order {
+  align-items: center;
+  justify-content: center;
+}
+#order[style*="block"] {
+  display: flex !important;
+}
+.modal {
+  margin-left: auto;
+  margin-right: auto;
+  width: min(520px, 100%);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+#admin-gate.show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gate-box {
+  margin: auto;
+}
+footer {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.landing-inner {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+.landing-logo {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: block;
+}
+
+@media (max-width: 800px) {
+  .filter-wrap { padding: 32px 16px 64px; }
+  .filter-card { padding: 24px 18px; border-radius: 16px; }
+  .admin-wrap { padding: 24px 14px 64px; }
+  .admin-form .row { grid-template-columns: 1fr !important; }
+  .section {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .results-head {
+    padding: 28px 16px 0;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .product { min-height: 0; }
+  .product-name { font-size: 14px; }
+  .product-price { font-size: 13px; }
+  .nav-inner { padding: 12px 14px; }
+  .logo { font-size: 18px; }
+  .enter { padding: 14px 28px; font-size: 14px; }
+  .landing-inner { padding: 12px; }
+  .landing-logo { width: min(320px, 82vw) !important; }
+  .modal { max-height: 92svh; overflow: auto; border-radius: 16px; }
+  #order { padding: 10px !important; }
+  .admin-item {
+    grid-template-columns: 48px 1fr !important;
+    gap: 10px;
+  }
+  .admin-item-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 420px) {
+  .grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .size-chip, .cat-chip, .size-btn {
+    min-width: 44px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .filter-wrap h1 { font-size: 1.55rem; }
+}
+
 </style>
 </head>
 <body>
@@ -967,15 +1117,19 @@ function saveDraft() {
   try {
     const payload = {
       categories: categories.slice(),
-      products: products.map(normalizeProduct)
+      products: products.map(normalizeProduct),
+      savedAt: new Date().toISOString()
     };
-    idbSet(IDB_KEY, payload).catch(() => {});
-  } catch (e) {}
+    return idbSet(IDB_KEY, payload).catch(function(err){ console.warn("saveDraft", err); });
+  } catch (e) {
+    return Promise.resolve();
+  }
 }
 async function loadDraft() {
   try {
     const data = await idbGet(IDB_KEY);
-    if (data && Array.isArray(data.products) && data.products.length) {
+    // Accept draft even if products is empty (user deleted everything)
+    if (data && typeof data === "object" && Array.isArray(data.products)) {
       products = data.products.map(normalizeProduct);
       categories = Array.isArray(data.categories) ? data.categories.filter(Boolean) : [];
       normalizeCatalog();
@@ -1397,10 +1551,10 @@ function renderCatList() {
     const chip = document.createElement("span");
     chip.className = "chip";
     chip.innerHTML = escapeHtml(c) + ' <button type="button" class="chip-remove" data-i="' + i + '">×</button>';
-    chip.querySelector("button").onclick = () => {
+    chip.querySelector("button").onclick = async () => {
       if (!confirm("حذف التصنيف «" + c + "»؟")) return;
       categories.splice(i, 1);
-      saveDraft();
+      await saveDraft();
       renderCatList();
       fillCatSelect();
     };
@@ -1443,10 +1597,10 @@ function renderAdminList() {
       '<button type="button" data-edit="' + idx + '">تعديل</button>' +
       '<button type="button" class="danger" data-del="' + idx + '">حذف</button></div>';
     row.querySelector("[data-edit]").onclick = () => editProduct(idx);
-    row.querySelector("[data-del]").onclick = () => {
+    row.querySelector("[data-del]").onclick = async () => {
       if (!confirm("حذف «" + p.name + "»؟")) return;
       products.splice(idx, 1);
-      saveDraft();
+      await saveDraft();
       renderAdminList();
     };
     list.appendChild(row);
