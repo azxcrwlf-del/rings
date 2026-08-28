@@ -251,7 +251,7 @@ button{border:0;cursor:pointer}
 }
 @keyframes starTwinkle{0%,100%{opacity:.3;transform:scale(.85)}50%{opacity:1;transform:scale(1.12)}}
 @keyframes landFadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-@keyframes landLogo{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes landLogo{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
 @media (prefers-reduced-motion:reduce){
   .landing-eyebrow,.logo-wrap,.logo-xl,.logo-ar,.landing-logo,.landing-tag,.enter,.enter-wrap,.landing-stars,.landing-badge,.landing-frame,.landing-divider{animation:none!important;opacity:1;transform:none}
   .logo-wrap::before{animation:none!important;opacity:.6}
@@ -675,6 +675,150 @@ footer {
     font-size: 13px;
   }
   .filter-wrap h1 { font-size: 1.55rem; }
+}
+
+
+/* ===== TRUE CENTER: logo + fonts (optical) ===== */
+#landing {
+  display: grid !important;
+  place-items: center !important;
+  justify-items: center !important;
+  text-align: center !important;
+}
+.landing-inner {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 100% !important;
+  max-width: 920px !important;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+}
+.landing-logo {
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-inline: auto !important;
+  position: relative !important;
+  left: 0 !important;
+  right: 0 !important;
+  float: none !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  /* kill any residual animation offset after load */
+  transform: none !important;
+  opacity: 1 !important;
+}
+.landing-stars,
+.landing-eyebrow,
+.landing-tag,
+.landing-divider,
+.enter-wrap,
+.landing-badge {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+}
+.landing-tag {
+  display: block !important;
+  text-align: center !important;
+}
+.landing-tag .en {
+  display: block !important;
+  text-align: center !important;
+}
+/* letter-spacing shifts text optically — compensate */
+.landing-eyebrow {
+  letter-spacing: 0.32em;
+  padding-inline-start: 0.32em; /* balances extra space after last char */
+  justify-content: center !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+.logo-xl {
+  letter-spacing: 0.28em;
+  padding-inline-start: 0.28em;
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.landing-badge {
+  flex-direction: column !important;
+  letter-spacing: 0;
+  text-align: center !important;
+}
+.landing-badge .en {
+  letter-spacing: 0.2em;
+  padding-inline-start: 0.2em;
+  text-align: center !important;
+}
+.enter-wrap {
+  display: flex !important;
+  justify-content: center !important;
+  width: auto !important;
+  position: relative !important;
+}
+.enter {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  /* balance the ◆ pseudo so the label looks centered */
+  padding-left: 40px !important;
+  padding-right: 40px !important;
+}
+.enter .en {
+  margin-left: 0 !important;
+  margin-right: 6px !important;
+}
+.landing-divider {
+  display: block !important;
+  width: 1px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.landing-stars {
+  gap: 16px !important;
+}
+
+/* Nav brand: don't push off-center on mobile */
+.nav-inner {
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+.logo {
+  text-align: center !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Filter / results headings truly centered */
+.filter-wrap {
+  text-align: center !important;
+}
+.filter-wrap h1,
+.filter-wrap .sub {
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.filter-card {
+  text-align: right !important; /* form content stays RTL */
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
 </style>
