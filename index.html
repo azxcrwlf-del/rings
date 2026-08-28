@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#011220">
 <title>خاتم علي — أحجار كريمة وفضة أصلية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="dns-prefetch" href="https://picsum.photos">
+<link rel="preconnect" href="https://picsum.photos" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600&family=Noto+Naskh+Arabic:wght@500;600;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -1739,6 +1741,40 @@ footer a {
   }
 }
 
+
+/* ===== MOBILE PERFORMANCE ===== */
+.product-img-wrap {
+  background: #0a1a22;
+  contain: layout paint;
+}
+.product-img {
+  content-visibility: auto;
+  background: #0a1a22;
+}
+.product {
+  content-visibility: auto;
+  contain-intrinsic-size: 180px 260px;
+}
+@media (max-width: 800px) {
+  /* Keep animations; only lighten cost on phone */
+  .landing-logo {
+    /* keep float but with mobile nudge from optical CSS */
+    opacity: 1 !important;
+  }
+  .product {
+    contain-intrinsic-size: 140px 220px;
+  }
+  /* particles stay visible — count limited in JS */
+  #particles {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 </style>
 </head>
 <body>
@@ -2231,9 +2267,10 @@ async function fetchPublished() {
     let dir = base.replace(/\/[^\/]*$/, "/");
     if (dir.indexOf("http") !== 0) dir = "/";
     const urls = [dir + "products.json", "products.json"];
+    // Use browser cache when possible (faster on phone / return visits)
     for (let i = 0; i < urls.length; i++) {
       try {
-        const r = await fetch(urls[i] + "?t=" + Date.now(), { cache: "no-store" });
+        const r = await fetch(urls[i], { cache: "default", credentials: "same-origin" });
         if (!r.ok) continue;
         const data = await r.json();
         if (applyRemote(data)) {
@@ -2376,31 +2413,74 @@ function applyFilter(showAll) {
   renderResults(matched);
   goResults();
 }
+function isMobile() {
+  return window.matchMedia && window.matchMedia("(max-width: 800px)").matches;
+}
+function optimizeImgUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  // Shrink picsum placeholders on phone
+  if (url.indexOf("picsum.photos") >= 0) {
+    return url.replace(/\/(\d+)\/(\d+)\/?$/, isMobile() ? "/320/320" : "/480/480");
+  }
+  return url;
+}
+function thumbUrl(p) {
+  const raw = displayImg(p);
+  return optimizeImgUrl(raw);
+}
+
+let _resultsAll = [];
+let _resultsShown = 0;
+const RESULTS_PAGE = 24; // paint first batch fast on phone
+
 function renderResults(list) {
   const grid = $("resultsGrid");
   const empty = $("resultsEmpty");
   const count = $("resultsCount");
   if (!grid) return;
+  _resultsAll = (list || []).map(normalizeProduct);
+  _resultsShown = 0;
   grid.innerHTML = "";
-  if (count) count.textContent = list.length ? (list.length + " قطعة") : "";
-  if (!list.length) {
+  // remove old load-more btn
+  const oldMore = $("loadMoreBtn");
+  if (oldMore) oldMore.remove();
+
+  if (count) count.textContent = _resultsAll.length ? (_resultsAll.length + " قطعة") : "";
+  if (!_resultsAll.length) {
     grid.style.display = "none";
     if (empty) empty.style.display = "block";
     return;
   }
   if (empty) empty.style.display = "none";
   grid.style.display = "grid";
-  list.forEach((p) => {
-    p = normalizeProduct(p);
+  appendResultBatch();
+}
+
+function appendResultBatch() {
+  const grid = $("resultsGrid");
+  if (!grid) return;
+  const start = _resultsShown;
+  const end = Math.min(_resultsAll.length, start + RESULTS_PAGE);
+  const frag = document.createDocumentFragment();
+
+  for (let i = start; i < end; i++) {
+    const p = _resultsAll[i];
     const card = document.createElement("article");
     card.className = "product";
-    card.onclick = () => openProduct(p);
-    const imgSrc = displayImg(p);
-    const imgHtml = imgSrc
-      ? '<img class="product-img" src="' + imgSrc + '" alt="" loading="lazy">'
-      : '<div class="product-img placeholder">صورة</div>';
+    card.style.contentVisibility = "auto";
+    card.style.containIntrinsicSize = "180px 260px";
+    const src = thumbUrl(p);
     const sizeNames = (p.sizes || []).filter(s => s.stock).map(s => s.name).join(" · ");
     const oos = p.inStock ? "" : '<span class="badge-oos">غير متوفر</span>';
+
+    let imgHtml;
+    if (src) {
+      // lazy + async decode; low priority on phone
+      imgHtml = '<img class="product-img" alt="" loading="lazy" decoding="async" fetchpriority="low" src="' + src + '">';
+    } else {
+      imgHtml = '<div class="product-img placeholder">صورة</div>';
+    }
+
     card.innerHTML = '<div class="product-img-wrap">' + imgHtml + '</div>' +
       '<div class="product-body"><div>' +
       (p.cat ? '<div class="product-cat">' + escapeHtml(p.cat) + '</div>' : '') +
@@ -2408,8 +2488,33 @@ function renderResults(list) {
       '<div class="product-price">' + escapeHtml(p.price) + '</div>' +
       (sizeNames ? '<div class="product-sizes">المقاسات: ' + escapeHtml(sizeNames) + '</div>' : '') +
       '</div></div>';
-    grid.appendChild(card);
-  });
+
+    // bind product by index into _resultsAll (stable)
+    card.addEventListener("click", (function(prod) {
+      return function() { openProduct(prod); };
+    })(p));
+    frag.appendChild(card);
+  }
+  grid.appendChild(frag);
+  _resultsShown = end;
+
+  // Load more control
+  let more = $("loadMoreBtn");
+  if (_resultsShown < _resultsAll.length) {
+    if (!more) {
+      more = document.createElement("button");
+      more.type = "button";
+      more.id = "loadMoreBtn";
+      more.className = "btn-secondary";
+      more.style.cssText = "display:block;width:min(320px,90%);margin:22px auto 10px;padding:14px;border-radius:999px;";
+      more.addEventListener("click", appendResultBatch);
+      grid.parentNode.insertBefore(more, grid.nextSibling);
+    }
+    more.textContent = "عرض المزيد (" + (_resultsAll.length - _resultsShown) + ")";
+    more.style.display = "block";
+  } else if (more) {
+    more.style.display = "none";
+  }
 }
 function escapeHtml(s) {
   return String(s || "").replace(/[&<>"']/g, c => ({
@@ -2477,7 +2582,12 @@ function showGalleryAt(i) {
     return;
   }
   if (ph) ph.style.display = "none";
-  if (img) { img.style.display = "block"; img.src = galleryImages[galleryIdx]; }
+  if (img) {
+    img.style.display = "block";
+    img.loading = "eager";
+    img.decoding = "async";
+    img.src = optimizeImgUrl(galleryImages[galleryIdx]);
+  }
   if (galleryImages.length > 1) {
     if (nav) nav.style.display = "flex";
     if (count) { count.style.display = ""; count.textContent = (galleryIdx + 1) + " / " + galleryImages.length; }
@@ -2494,11 +2604,19 @@ function showGalleryAt(i) {
     }
     if (thumbs) {
       thumbs.innerHTML = "";
+      // Only build thumbnails for nearby images on mobile (faster)
+      const mobile = isMobile();
       galleryImages.forEach((src, ti) => {
+        if (mobile && Math.abs(ti - galleryIdx) > 2 && ti !== 0) return;
         const t = document.createElement("button");
         t.type = "button";
         t.className = ti === galleryIdx ? "on" : "";
-        t.innerHTML = '<img src="' + src + '" alt="">';
+        const tImg = document.createElement("img");
+        tImg.alt = "";
+        tImg.loading = "lazy";
+        tImg.decoding = "async";
+        tImg.src = optimizeImgUrl(src);
+        t.appendChild(tImg);
         t.onclick = () => showGalleryAt(ti);
         thumbs.appendChild(t);
       });
@@ -2866,19 +2984,28 @@ function initParticles() {
   try {
     const canvas = $("particles");
     if (!canvas) return;
-    particleCtx = canvas.getContext("2d");
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      canvas.style.display = "none";
+      return;
+    }
+    canvas.style.display = "block";
+    particleCtx = canvas.getContext("2d", { alpha: true });
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     particles = [];
-    const n = Math.min(50, Math.floor(window.innerWidth / 18));
+    // Limit particles: fewer on phone, moderate on desktop
+    const mobile = isMobile();
+    const n = mobile
+      ? Math.min(14, Math.max(8, Math.floor(window.innerWidth / 40)))
+      : Math.min(28, Math.floor(window.innerWidth / 28));
     for (let i = 0; i < n; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        r: Math.random() * 1.4 + 0.3,
-        vx: (Math.random() - 0.5) * 0.2,
-        vy: (Math.random() - 0.5) * 0.15,
-        a: Math.random() * 0.4 + 0.15,
+        r: Math.random() * (mobile ? 1.0 : 1.2) + 0.3,
+        vx: (Math.random() - 0.5) * (mobile ? 0.12 : 0.15),
+        vy: (Math.random() - 0.5) * (mobile ? 0.1 : 0.12),
+        a: Math.random() * 0.35 + 0.1,
         tw: Math.random() * 0.8 + 0.4,
         phase: Math.random() * Math.PI * 2
       });
