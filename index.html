@@ -2004,7 +2004,12 @@ img {
             <option value="الأبيض سيدي الشيخ">الأبيض سيدي الشيخ</option>
           </select>
         </div>
+        
         <div>
+          <label>البلدية</label>
+          <input id="orderBaladiya" required placeholder="اسم البلدية" autocomplete="address-level2">
+        </div>
+<div>
           <label>ملاحظات (اختياري)</label>
           <input id="orderNote" placeholder="لون الحجر، المقاس الدقيق…">
         </div>
@@ -2128,7 +2133,7 @@ const AUTH_KEY = "khatemali_admin_auth";
 const IDB_NAME = "khatemAliDB";
 const IDB_STORE = "kv";
 const IDB_KEY = "appdata";
-const ALL_SIZES = ["14","15","16","17","18","19","20","21","22","23","24","25"];
+const ALL_SIZES = ["40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76"];
 const WA_NUMBER = "213699069436";
 
 const defaultCategories = [];
@@ -2532,6 +2537,7 @@ function openProduct(p) {
   $("orderName").value = "";
   $("orderPhone").value = "";
   $("orderWilaya").selectedIndex = 0;
+  if ($("orderBaladiya")) $("orderBaladiya").value = "";
   $("orderNote").value = "";
   showGalleryAt(0);
   const sizeBox = $("sizeOptions");
@@ -2642,6 +2648,7 @@ function sendOrder(e) {
   const name = $("orderName").value.trim();
   const phone = $("orderPhone").value.trim();
   const wilaya = $("orderWilaya").value;
+  const baladiya = $("orderBaladiya") ? $("orderBaladiya").value.trim() : "";
   const note = $("orderNote").value.trim();
   let msg = "السلام عليكم، أريد طلب:\n";
   msg += "• المنتج: " + selected.name + "\n";
@@ -2651,6 +2658,7 @@ function sendOrder(e) {
   msg += "• الاسم: " + name + "\n";
   msg += "• الهاتف: " + phone + "\n";
   msg += "• الولاية: " + wilaya + "\n";
+  if (baladiya) msg += "• البلدية: " + baladiya + "\n";
   if (note) msg += "• ملاحظات: " + note + "\n";
   window.open("https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(msg), "_blank");
 }
