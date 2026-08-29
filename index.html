@@ -2096,13 +2096,13 @@ const ADMIN_PASS = "khatem2026";
    ================================================================ */
 const PUBLISH_CONFIG = {
   /* Direct GitHub publish — NO Cloudflare.
-     Create a Fine-grained token (Contents: Read and write) on repo ALIII only.
+     Create a Fine-grained token (Contents: Read and write) on repo rings only.
      The token is visible in page source — only give it access to THIS one repo. */
   githubOwner: "azxcrwlf-del",
-  githubRepo: "ALIII",
+  githubRepo: "rings",
   githubBranch: "main",
   targetFile: "products.json",
-  githubToken: "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"   // paste your github_pat_... token here
+  githubToken: "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"   // paste your github_pat_... token here
 };
 
 const AUTH_KEY = "khatemali_admin_auth";
@@ -2819,6 +2819,27 @@ function saveProduct(e) {
   resetEditor();
   renderAdminList();
 }
+async function githubApiError(res, fallback) {
+  let detail = "";
+  let docs = "";
+  try {
+    const err = await res.json();
+    detail = (err && err.message) ? String(err.message) : "";
+    docs = (err && err.documentation_url) ? String(err.documentation_url) : "";
+  } catch (e) {
+    try { detail = (await res.text()).slice(0, 300); } catch (e2) {}
+  }
+  let msg = (fallback || "GitHub API error") + " (" + res.status + ")";
+  if (detail) msg += ": " + detail;
+  if (docs) msg += " — " + docs;
+  if (res.status === 401 || res.status === 403) {
+    msg += " | Check: fine-grained PAT has Contents Read and write on repo " +
+      ((PUBLISH_CONFIG && PUBLISH_CONFIG.githubOwner) || "") + "/" +
+      ((PUBLISH_CONFIG && PUBLISH_CONFIG.githubRepo) || "") +
+      ", token not expired, and Authorization: Bearer <token>.";
+  }
+  return msg;
+}
 async function publishSite() {
   const btn = $("btnPublish");
   if (btn && btn.dataset.publishing === "1") return;
@@ -2831,10 +2852,10 @@ async function publishSite() {
   };
   const content = JSON.stringify(payload, null, 2);
   const fileName = (PUBLISH_CONFIG && PUBLISH_CONFIG.targetFile) || "products.json";
-  const owner = (PUBLISH_CONFIG && PUBLISH_CONFIG.githubOwner) || "";
-  const repo = (PUBLISH_CONFIG && PUBLISH_CONFIG.githubRepo) || "";
-  const branch = (PUBLISH_CONFIG && PUBLISH_CONFIG.githubBranch) || "main";
-  const token = (PUBLISH_CONFIG && PUBLISH_CONFIG.githubToken) || "";
+  const owner = String((PUBLISH_CONFIG && PUBLISH_CONFIG.githubOwner) || "").trim();
+  const repo = String((PUBLISH_CONFIG && PUBLISH_CONFIG.githubRepo) || "").trim();
+  let branch = String((PUBLISH_CONFIG && PUBLISH_CONFIG.githubBranch) || "main").trim() || "main";
+  const token = String((PUBLISH_CONFIG && PUBLISH_CONFIG.githubToken) || "").trim();
 
   if (!token || !owner || !repo) {
     downloadBlob(new Blob([content], { type: "application/json;charset=utf-8" }), fileName);
@@ -2844,7 +2865,7 @@ async function publishSite() {
       "تم تحميل " + fileName + " كالسابق.\\n\\n" +
       "الخطوات:\\n" +
       "1) github.com/settings/tokens?type=beta\\n" +
-      "2) Fine-grained token → مستودع ALIII فقط\\n" +
+      "2) Fine-grained token → مستودع rings فقط\\n" +
       "3) Contents: Read and write\\n" +
       "4) الصق الرمز في PUBLISH_CONFIG.githubToken داخل index.html"
     );
@@ -2859,23 +2880,35 @@ async function publishSite() {
   setPublishStatus("جاري النشر إلى GitHub… (" + products.length + " منتج)");
 
   try {
-    const api = "https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + fileName;
+    const api = "https://api.github.com/repos/" + encodeURIComponent(owner) + "/" +
+      encodeURIComponent(repo) + "/contents/" + fileName.split("/").map(encodeURIComponent).join("/");
+    // Fine-grained + classic PATs: Authorization Bearer <token>
     const headers = {
       "Accept": "application/vnd.github+json",
       "Authorization": "Bearer " + token,
-      "X-GitHub-Api-Version": "2022-11-28",
-      "Content-Type": "application/json"
+      "X-GitHub-Api-Version": "2022-11-28"
     };
+    const putHeaders = Object.assign({}, headers, {
+      "Content-Type": "application/json"
+    });
 
     // Get current SHA (needed to update existing file)
     let sha;
-    const getRes = await fetch(api + "?ref=" + encodeURIComponent(branch), { headers: headers });
+    let getRes = await fetch(api + "?ref=" + encodeURIComponent(branch), { headers: headers });
+    if (getRes.status === 404 && branch === "main") {
+      const tryMaster = await fetch(api + "?ref=master", { headers: headers });
+      if (tryMaster.status === 200) {
+        getRes = tryMaster;
+        branch = "master";
+      } else if (tryMaster.status !== 404) {
+        throw new Error(await githubApiError(tryMaster, "Failed to read file from GitHub"));
+      }
+    }
     if (getRes.status === 200) {
       const cur = await getRes.json();
       sha = cur.sha;
     } else if (getRes.status !== 404) {
-      const t = await getRes.text();
-      throw new Error("تعذر قراءة الملف من GitHub (" + getRes.status + ")");
+      throw new Error(await githubApiError(getRes, "Failed to read file from GitHub"));
     }
 
     // UTF-8 → base64 (handles Arabic)
@@ -2895,20 +2928,12 @@ async function publishSite() {
 
     const putRes = await fetch(api, {
       method: "PUT",
-      headers: headers,
+      headers: putHeaders,
       body: JSON.stringify(body)
     });
 
     if (!putRes.ok) {
-      let detail = "";
-      try {
-        const err = await putRes.json();
-        detail = err.message || "";
-      } catch (e) {}
-      if (putRes.status === 401 || putRes.status === 403) {
-        throw new Error("التوكن مرفوض أو بلا صلاحية Contents. أنشئ توكن جديد بصلاحية Read and write.");
-      }
-      throw new Error("فشل الالتزام (" + putRes.status + ") " + detail);
+      throw new Error(await githubApiError(putRes, "Failed to commit to GitHub"));
     }
 
     setPublishStatus("✅ Published successfully — " + products.length + " منتج");
