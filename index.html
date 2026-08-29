@@ -2088,21 +2088,19 @@ footer a {
 const ADMIN_PASS = "khatem2026";
 
 /* ========== PUBLISH CONFIG (safe to expose in frontend) ==========
-   Fill these in after you deploy the Cloudflare Worker.
-   NEVER put a GitHub token here.
-   PUBLISH_KEY must match the Worker secret PUBLISH_SECRET.
-   Anyone who can open View-Source can see PUBLISH_KEY — treat it like
-   a second admin password, and restrict Worker CORS to your site origin.
+   Direct GitHub publish — no proxy/backend.
+   Create a Fine-grained token (Contents: Read and write) on repo
+   rings ONLY, then paste it below.
+   NOTE: this token will be visible to anyone who views this page's
+   source. Only give it access to this one repo, and rotate it if you
+   ever suspect it's leaked.
    ================================================================ */
 const PUBLISH_CONFIG = {
-  /* Direct GitHub publish — NO Cloudflare.
-     Create a Fine-grained token (Contents: Read and write) on repo rings only.
-     The token is visible in page source — only give it access to THIS one repo. */
   githubOwner: "azxcrwlf-del",
   githubRepo: "rings",
   githubBranch: "main",
   targetFile: "products.json",
-  githubToken: "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"   // paste your github_pat_... token here
+  githubToken: "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"
 };
 
 const AUTH_KEY = "khatemali_admin_auth";
