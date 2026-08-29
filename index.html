@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#011220">
 <title>خاتم علي — أحجار كريمة وفضة أصلية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="dns-prefetch" href="https://picsum.photos">
+<link rel="preconnect" href="https://picsum.photos" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600&family=Noto+Naskh+Arabic:wght@500;600;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -1739,6 +1741,40 @@ footer a {
   }
 }
 
+
+/* ===== MOBILE PERFORMANCE ===== */
+.product-img-wrap {
+  background: #0a1a22;
+  contain: layout paint;
+}
+.product-img {
+  content-visibility: auto;
+  background: #0a1a22;
+}
+.product {
+  content-visibility: auto;
+  contain-intrinsic-size: 180px 260px;
+}
+@media (max-width: 800px) {
+  /* Keep animations; only lighten cost on phone */
+  .landing-logo {
+    /* keep float but with mobile nudge from optical CSS */
+    opacity: 1 !important;
+  }
+  .product {
+    contain-intrinsic-size: 140px 220px;
+  }
+  /* particles stay visible — count limited in JS */
+  #particles {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 </style>
 </head>
 <body>
@@ -1968,7 +2004,12 @@ footer a {
             <option value="الأبيض سيدي الشيخ">الأبيض سيدي الشيخ</option>
           </select>
         </div>
+        
         <div>
+          <label>البلدية</label>
+          <input id="orderBaladiya" required placeholder="اسم البلدية" autocomplete="address-level2">
+        </div>
+<div>
           <label>ملاحظات (اختياري)</label>
           <input id="orderNote" placeholder="لون الحجر، المقاس الدقيق…">
         </div>
@@ -2061,10 +2102,12 @@ footer a {
     <div class="admin-card">
       <h2>نشر على GitHub Pages</h2>
       <p class="admin-note">
-        التعديلات هنا محلية حتى تنشر. اضغط <strong>🚀 Publish Changes</strong> لرفع <strong>products.json</strong> مباشرة إلى GitHub (بدون Cloudflare).<br>
-        يمكنك أيضاً تصدير نسخة احتياطية من الأزرار بالأسفل.
+        التعديلات هنا محلية على هذا الجهاز فقط. ليراها الزوار:<br>
+        1) اضغط الزر لتحميل <strong>products.json</strong><br>
+        2) ارفعه في جذر المستودع بجانب index.html على GitHub<br>
+        3) Commit + Push — بعد دقيقة أو دقيقتين يظهر للجميع
       </p>
-      <button type="button" class="admin-btn" id="btnPublish">🚀 Publish Changes</button>
+      <button type="button" class="admin-btn" id="btnPublish">نشر — تحميل products.json</button>
       <div id="publishStatus"></div>
       <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="admin-btn secondary" id="btnExport">تصدير JSON</button>
@@ -2086,28 +2129,11 @@ footer a {
    ========================================================= */
 
 const ADMIN_PASS = "khatem2026";
-
-/* ========== PUBLISH CONFIG (safe to expose in frontend) ==========
-   Direct GitHub publish — no proxy/backend.
-   Create a Fine-grained token (Contents: Read and write) on repo
-   rings ONLY, then paste it below.
-   NOTE: this token will be visible to anyone who views this page's
-   source. Only give it access to this one repo, and rotate it if you
-   ever suspect it's leaked.
-   ================================================================ */
-const PUBLISH_CONFIG = {
-  githubOwner: "azxcrwlf-del",
-  githubRepo: "rings",
-  githubBranch: "main",
-  targetFile: "products.json",
-  githubToken: ""   // Do NOT put a real token here — this file is pushed publicly. Use local-admin.html instead.
-};
-
 const AUTH_KEY = "khatemali_admin_auth";
 const IDB_NAME = "khatemAliDB";
 const IDB_STORE = "kv";
 const IDB_KEY = "appdata";
-const ALL_SIZES = ["14","15","16","17","18","19","20","21","22","23","24","25"];
+const ALL_SIZES = ["40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76"];
 const WA_NUMBER = "213699069436";
 
 const defaultCategories = [];
@@ -2246,9 +2272,10 @@ async function fetchPublished() {
     let dir = base.replace(/\/[^\/]*$/, "/");
     if (dir.indexOf("http") !== 0) dir = "/";
     const urls = [dir + "products.json", "products.json"];
+    // Use browser cache when possible (faster on phone / return visits)
     for (let i = 0; i < urls.length; i++) {
       try {
-        const r = await fetch(urls[i] + "?t=" + Date.now(), { cache: "no-store" });
+        const r = await fetch(urls[i], { cache: "default", credentials: "same-origin" });
         if (!r.ok) continue;
         const data = await r.json();
         if (applyRemote(data)) {
@@ -2391,31 +2418,74 @@ function applyFilter(showAll) {
   renderResults(matched);
   goResults();
 }
+function isMobile() {
+  return window.matchMedia && window.matchMedia("(max-width: 800px)").matches;
+}
+function optimizeImgUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  // Shrink picsum placeholders on phone
+  if (url.indexOf("picsum.photos") >= 0) {
+    return url.replace(/\/(\d+)\/(\d+)\/?$/, isMobile() ? "/320/320" : "/480/480");
+  }
+  return url;
+}
+function thumbUrl(p) {
+  const raw = displayImg(p);
+  return optimizeImgUrl(raw);
+}
+
+let _resultsAll = [];
+let _resultsShown = 0;
+const RESULTS_PAGE = 24; // paint first batch fast on phone
+
 function renderResults(list) {
   const grid = $("resultsGrid");
   const empty = $("resultsEmpty");
   const count = $("resultsCount");
   if (!grid) return;
+  _resultsAll = (list || []).map(normalizeProduct);
+  _resultsShown = 0;
   grid.innerHTML = "";
-  if (count) count.textContent = list.length ? (list.length + " قطعة") : "";
-  if (!list.length) {
+  // remove old load-more btn
+  const oldMore = $("loadMoreBtn");
+  if (oldMore) oldMore.remove();
+
+  if (count) count.textContent = _resultsAll.length ? (_resultsAll.length + " قطعة") : "";
+  if (!_resultsAll.length) {
     grid.style.display = "none";
     if (empty) empty.style.display = "block";
     return;
   }
   if (empty) empty.style.display = "none";
   grid.style.display = "grid";
-  list.forEach((p) => {
-    p = normalizeProduct(p);
+  appendResultBatch();
+}
+
+function appendResultBatch() {
+  const grid = $("resultsGrid");
+  if (!grid) return;
+  const start = _resultsShown;
+  const end = Math.min(_resultsAll.length, start + RESULTS_PAGE);
+  const frag = document.createDocumentFragment();
+
+  for (let i = start; i < end; i++) {
+    const p = _resultsAll[i];
     const card = document.createElement("article");
     card.className = "product";
-    card.onclick = () => openProduct(p);
-    const imgSrc = displayImg(p);
-    const imgHtml = imgSrc
-      ? '<img class="product-img" src="' + imgSrc + '" alt="" loading="lazy">'
-      : '<div class="product-img placeholder">صورة</div>';
+    card.style.contentVisibility = "auto";
+    card.style.containIntrinsicSize = "180px 260px";
+    const src = thumbUrl(p);
     const sizeNames = (p.sizes || []).filter(s => s.stock).map(s => s.name).join(" · ");
     const oos = p.inStock ? "" : '<span class="badge-oos">غير متوفر</span>';
+
+    let imgHtml;
+    if (src) {
+      // lazy + async decode; low priority on phone
+      imgHtml = '<img class="product-img" alt="" loading="lazy" decoding="async" fetchpriority="low" src="' + src + '">';
+    } else {
+      imgHtml = '<div class="product-img placeholder">صورة</div>';
+    }
+
     card.innerHTML = '<div class="product-img-wrap">' + imgHtml + '</div>' +
       '<div class="product-body"><div>' +
       (p.cat ? '<div class="product-cat">' + escapeHtml(p.cat) + '</div>' : '') +
@@ -2423,8 +2493,33 @@ function renderResults(list) {
       '<div class="product-price">' + escapeHtml(p.price) + '</div>' +
       (sizeNames ? '<div class="product-sizes">المقاسات: ' + escapeHtml(sizeNames) + '</div>' : '') +
       '</div></div>';
-    grid.appendChild(card);
-  });
+
+    // bind product by index into _resultsAll (stable)
+    card.addEventListener("click", (function(prod) {
+      return function() { openProduct(prod); };
+    })(p));
+    frag.appendChild(card);
+  }
+  grid.appendChild(frag);
+  _resultsShown = end;
+
+  // Load more control
+  let more = $("loadMoreBtn");
+  if (_resultsShown < _resultsAll.length) {
+    if (!more) {
+      more = document.createElement("button");
+      more.type = "button";
+      more.id = "loadMoreBtn";
+      more.className = "btn-secondary";
+      more.style.cssText = "display:block;width:min(320px,90%);margin:22px auto 10px;padding:14px;border-radius:999px;";
+      more.addEventListener("click", appendResultBatch);
+      grid.parentNode.insertBefore(more, grid.nextSibling);
+    }
+    more.textContent = "عرض المزيد (" + (_resultsAll.length - _resultsShown) + ")";
+    more.style.display = "block";
+  } else if (more) {
+    more.style.display = "none";
+  }
 }
 function escapeHtml(s) {
   return String(s || "").replace(/[&<>"']/g, c => ({
@@ -2442,6 +2537,7 @@ function openProduct(p) {
   $("orderName").value = "";
   $("orderPhone").value = "";
   $("orderWilaya").selectedIndex = 0;
+  if ($("orderBaladiya")) $("orderBaladiya").value = "";
   $("orderNote").value = "";
   showGalleryAt(0);
   const sizeBox = $("sizeOptions");
@@ -2492,7 +2588,12 @@ function showGalleryAt(i) {
     return;
   }
   if (ph) ph.style.display = "none";
-  if (img) { img.style.display = "block"; img.src = galleryImages[galleryIdx]; }
+  if (img) {
+    img.style.display = "block";
+    img.loading = "eager";
+    img.decoding = "async";
+    img.src = optimizeImgUrl(galleryImages[galleryIdx]);
+  }
   if (galleryImages.length > 1) {
     if (nav) nav.style.display = "flex";
     if (count) { count.style.display = ""; count.textContent = (galleryIdx + 1) + " / " + galleryImages.length; }
@@ -2509,11 +2610,19 @@ function showGalleryAt(i) {
     }
     if (thumbs) {
       thumbs.innerHTML = "";
+      // Only build thumbnails for nearby images on mobile (faster)
+      const mobile = isMobile();
       galleryImages.forEach((src, ti) => {
+        if (mobile && Math.abs(ti - galleryIdx) > 2 && ti !== 0) return;
         const t = document.createElement("button");
         t.type = "button";
         t.className = ti === galleryIdx ? "on" : "";
-        t.innerHTML = '<img src="' + src + '" alt="">';
+        const tImg = document.createElement("img");
+        tImg.alt = "";
+        tImg.loading = "lazy";
+        tImg.decoding = "async";
+        tImg.src = optimizeImgUrl(src);
+        t.appendChild(tImg);
         t.onclick = () => showGalleryAt(ti);
         thumbs.appendChild(t);
       });
@@ -2539,6 +2648,7 @@ function sendOrder(e) {
   const name = $("orderName").value.trim();
   const phone = $("orderPhone").value.trim();
   const wilaya = $("orderWilaya").value;
+  const baladiya = $("orderBaladiya") ? $("orderBaladiya").value.trim() : "";
   const note = $("orderNote").value.trim();
   let msg = "السلام عليكم، أريد طلب:\n";
   msg += "• المنتج: " + selected.name + "\n";
@@ -2548,6 +2658,7 @@ function sendOrder(e) {
   msg += "• الاسم: " + name + "\n";
   msg += "• الهاتف: " + phone + "\n";
   msg += "• الولاية: " + wilaya + "\n";
+  if (baladiya) msg += "• البلدية: " + baladiya + "\n";
   if (note) msg += "• ملاحظات: " + note + "\n";
   window.open("https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(msg), "_blank");
 }
@@ -2817,141 +2928,26 @@ function saveProduct(e) {
   resetEditor();
   renderAdminList();
 }
-async function githubApiError(res, fallback) {
-  let detail = "";
-  let docs = "";
-  try {
-    const err = await res.json();
-    detail = (err && err.message) ? String(err.message) : "";
-    docs = (err && err.documentation_url) ? String(err.documentation_url) : "";
-  } catch (e) {
-    try { detail = (await res.text()).slice(0, 300); } catch (e2) {}
-  }
-  let msg = (fallback || "GitHub API error") + " (" + res.status + ")";
-  if (detail) msg += ": " + detail;
-  if (docs) msg += " — " + docs;
-  if (res.status === 401 || res.status === 403) {
-    msg += " | Check: fine-grained PAT has Contents Read and write on repo " +
-      ((PUBLISH_CONFIG && PUBLISH_CONFIG.githubOwner) || "") + "/" +
-      ((PUBLISH_CONFIG && PUBLISH_CONFIG.githubRepo) || "") +
-      ", token not expired, and Authorization: Bearer <token>.";
-  }
-  return msg;
-}
-async function publishSite() {
-  const btn = $("btnPublish");
-  if (btn && btn.dataset.publishing === "1") return;
-
+function publishSite() {
   saveDraft();
   const payload = {
     categories: categories.slice(),
     products: products.map(normalizeProduct),
     updatedAt: new Date().toISOString()
   };
-  const content = JSON.stringify(payload, null, 2);
-  const fileName = (PUBLISH_CONFIG && PUBLISH_CONFIG.targetFile) || "products.json";
-  const owner = String((PUBLISH_CONFIG && PUBLISH_CONFIG.githubOwner) || "").trim();
-  const repo = String((PUBLISH_CONFIG && PUBLISH_CONFIG.githubRepo) || "").trim();
-  let branch = String((PUBLISH_CONFIG && PUBLISH_CONFIG.githubBranch) || "main").trim() || "main";
-  const token = String((PUBLISH_CONFIG && PUBLISH_CONFIG.githubToken) || "").trim();
-
-  if (!token || !owner || !repo) {
-    downloadBlob(new Blob([content], { type: "application/json;charset=utf-8" }), fileName);
-    setPublishStatus("لا يوجد توكن GitHub — تم تحميل " + fileName + " يدوياً. ضع githubToken في PUBLISH_CONFIG.");
-    alert(
-      "لم يتم ضبط رمز GitHub بعد.\\n\\n" +
-      "تم تحميل " + fileName + " كالسابق.\\n\\n" +
-      "الخطوات:\\n" +
-      "1) github.com/settings/tokens?type=beta\\n" +
-      "2) Fine-grained token → مستودع rings فقط\\n" +
-      "3) Contents: Read and write\\n" +
-      "4) الصق الرمز في PUBLISH_CONFIG.githubToken داخل index.html"
-    );
-    return;
-  }
-
-  if (btn) {
-    btn.dataset.publishing = "1";
-    btn.disabled = true;
-    btn.textContent = "Publishing...";
-  }
-  setPublishStatus("جاري النشر إلى GitHub… (" + products.length + " منتج)");
-
-  try {
-    const api = "https://api.github.com/repos/" + encodeURIComponent(owner) + "/" +
-      encodeURIComponent(repo) + "/contents/" + fileName.split("/").map(encodeURIComponent).join("/");
-    // Fine-grained + classic PATs: Authorization Bearer <token>
-    const headers = {
-      "Accept": "application/vnd.github+json",
-      "Authorization": "Bearer " + token,
-      "X-GitHub-Api-Version": "2022-11-28"
-    };
-    const putHeaders = Object.assign({}, headers, {
-      "Content-Type": "application/json"
-    });
-
-    // Get current SHA (needed to update existing file)
-    let sha;
-    let getRes = await fetch(api + "?ref=" + encodeURIComponent(branch), { headers: headers });
-    if (getRes.status === 404 && branch === "main") {
-      const tryMaster = await fetch(api + "?ref=master", { headers: headers });
-      if (tryMaster.status === 200) {
-        getRes = tryMaster;
-        branch = "master";
-      } else if (tryMaster.status !== 404) {
-        throw new Error(await githubApiError(tryMaster, "Failed to read file from GitHub"));
-      }
-    }
-    if (getRes.status === 200) {
-      const cur = await getRes.json();
-      sha = cur.sha;
-    } else if (getRes.status !== 404) {
-      throw new Error(await githubApiError(getRes, "Failed to read file from GitHub"));
-    }
-
-    // UTF-8 → base64 (handles Arabic)
-    function toBase64(str) {
-      const bytes = new TextEncoder().encode(str);
-      let bin = "";
-      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-      return btoa(bin);
-    }
-
-    const body = {
-      message: "Update products (" + products.length + " items)",
-      content: toBase64(content),
-      branch: branch
-    };
-    if (sha) body.sha = sha;
-
-    const putRes = await fetch(api, {
-      method: "PUT",
-      headers: putHeaders,
-      body: JSON.stringify(body)
-    });
-
-    if (!putRes.ok) {
-      throw new Error(await githubApiError(putRes, "Failed to commit to GitHub"));
-    }
-
-    setPublishStatus("✅ Published successfully — " + products.length + " منتج");
-    if (btn) btn.textContent = "✅ Published successfully";
-    alert("✅ تم النشر بنجاح\\n\\n" + products.length + " منتج على GitHub.\\nانتظر دقيقة ثم افتح الموقع في نافذة خاصة.");
-  } catch (err) {
-    const msg = (err && err.message) ? err.message : "Publish failed";
-    console.warn("[publish]", msg);
-    setPublishStatus("❌ فشل النشر: " + msg);
-    if (btn) btn.textContent = "🚀 Publish Changes";
-    alert("❌ فشل النشر\\n\\n" + msg + "\\n\\nيمكنك استخدام «تصدير JSON» كنسخة احتياطية.");
-  } finally {
-    if (btn) {
-      btn.dataset.publishing = "0";
-      btn.disabled = false;
-      setTimeout(function () {
-        if (btn && btn.dataset.publishing !== "1") btn.textContent = "🚀 Publish Changes";
-      }, 4000);
-    }
-  }
+  const jsonStr = JSON.stringify(payload, null, 2);
+  const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8" });
+  downloadBlob(blob, "products.json");
+  const mb = (jsonStr.length / 1024 / 1024).toFixed(2);
+  setPublishStatus("تم تحميل products.json (" + products.length + " منتج · ~" + mb + " ميجا)");
+  alert(
+    "تم تحميل products.json\n\n" +
+    products.length + " منتج.\n\n" +
+    "ارفع الملف على GitHub:\n" +
+    "1) ضعه في جذر المستودع بجانب index.html\n" +
+    "2) Commit ثم Push\n" +
+    "3) بعد دقيقة افتح الموقع في نافذة خاصة للتأكد"
+  );
 }
 function exportProducts() {
   const payload = {
@@ -2996,19 +2992,28 @@ function initParticles() {
   try {
     const canvas = $("particles");
     if (!canvas) return;
-    particleCtx = canvas.getContext("2d");
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      canvas.style.display = "none";
+      return;
+    }
+    canvas.style.display = "block";
+    particleCtx = canvas.getContext("2d", { alpha: true });
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     particles = [];
-    const n = Math.min(50, Math.floor(window.innerWidth / 18));
+    // Limit particles: fewer on phone, moderate on desktop
+    const mobile = isMobile();
+    const n = mobile
+      ? Math.min(14, Math.max(8, Math.floor(window.innerWidth / 40)))
+      : Math.min(28, Math.floor(window.innerWidth / 28));
     for (let i = 0; i < n; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        r: Math.random() * 1.4 + 0.3,
-        vx: (Math.random() - 0.5) * 0.2,
-        vy: (Math.random() - 0.5) * 0.15,
-        a: Math.random() * 0.4 + 0.15,
+        r: Math.random() * (mobile ? 1.0 : 1.2) + 0.3,
+        vx: (Math.random() - 0.5) * (mobile ? 0.12 : 0.15),
+        vy: (Math.random() - 0.5) * (mobile ? 0.1 : 0.12),
+        a: Math.random() * 0.35 + 0.1,
         tw: Math.random() * 0.8 + 0.4,
         phase: Math.random() * Math.PI * 2
       });
