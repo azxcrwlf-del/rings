@@ -2318,6 +2318,10 @@ const WA_NUMBER = "213699069436";
 const defaultCategories = [];
 const defaultProducts = [{"cat": "", "name": "خاتم فضة نسائي رقيق", "price": "3200 دج", "images": [], "inStock": true, "sizes": [{"name": "15", "stock": true}, {"name": "16", "stock": true}, {"name": "17", "stock": true}, {"name": "18", "stock": true}]}];
 
+
+    const defaultSiteContent = { landingEyebrow: "أصلي · فضة · حجر كريم", landingTag: "أحجار كريمة أصلية وخواتم فضة للرجال والنساء", landingTagEn: "Genuine stones & silver rings", landingBadge: "محمّدية مول · المحمّدية", landingBadgeEn: "Mohammedia Mall · Algiers", filterTitle: "اختر ما يناسبك", filterSubtitle: "حدّد المواصفات والميزانية لنعرض لك القطع المناسبة", filterSubtitleEn: "Choose size, weight and budget", locationTitle: "الموقع", locationBody: "محمّدية مول — المحل رقم 980\\nمركز تجاري وأعمال، المحمّدية 16000\\nبيع الأحجار الكريمة الأصلية ومجوهرات وخواتم رجالية ونسائية", locationEn: "Mohammedia Mall · Local n°980 · Algiers", contactTitle: "تواصل معنا", contactBody: "للاستفسار عن الأحجار أو المقاسات أو الطلبات الخاصة", contactEn: "Questions about stones, sizing or custom orders" };
+    let siteContent = Object.assign({}, defaultSiteContent);
+    
 let categories = [];
 let products = [];
 let selected = null;
@@ -2414,11 +2418,52 @@ function idbSet(key, val) {
     } catch (e) { reject(e); }
   }));
 }
+
+    function escapeSiteText(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function(ch) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\\\"": "&quot;", "'": "&#39;" }[ch]; });
+    }
+    function setSiteText(id, value, multiline) {
+    const el = $(id);
+    if (!el) return;
+    const safe = escapeSiteText(value);
+    el.innerHTML = multiline ? safe.replace(/\\r?\\n/g, "<br>") : safe;
+    }
+    function applySiteContent(data) {
+    if (data && typeof data === "object") siteContent = Object.assign({}, defaultSiteContent, data);
+    setSiteText("siteLandingEyebrow", siteContent.landingEyebrow);
+    setSiteText("siteLandingTag", siteContent.landingTag);
+    setSiteText("siteLandingTagEn", siteContent.landingTagEn);
+    setSiteText("siteLandingBadge", siteContent.landingBadge);
+    setSiteText("siteLandingBadgeEn", siteContent.landingBadgeEn);
+    setSiteText("siteFilterTitle", siteContent.filterTitle);
+    setSiteText("siteFilterSubtitle", siteContent.filterSubtitle);
+    setSiteText("siteFilterSubtitleEn", siteContent.filterSubtitleEn);
+    setSiteText("siteLocationTitle", siteContent.locationTitle);
+    setSiteText("siteLocationBody", siteContent.locationBody, true);
+    setSiteText("siteLocationEn", siteContent.locationEn);
+    setSiteText("siteContactTitle", siteContent.contactTitle);
+    setSiteText("siteContactBody", siteContent.contactBody, true);
+    setSiteText("siteContactEn", siteContent.contactEn);
+    }
+    function renderSiteContentEditor() {
+    const fields = { landingEyebrow: "site-landing-eyebrow", landingTag: "site-landing-tag", landingTagEn: "site-landing-tag-en", landingBadge: "site-landing-badge", landingBadgeEn: "site-landing-badge-en", filterTitle: "site-filter-title", filterSubtitle: "site-filter-subtitle", filterSubtitleEn: "site-filter-subtitle-en", locationTitle: "site-location-title", locationBody: "site-location-body", locationEn: "site-location-en", contactTitle: "site-contact-title", contactBody: "site-contact-body", contactEn: "site-contact-en" };
+    Object.keys(fields).forEach(function(key) { const el = $(fields[key]); if (el) el.value = siteContent[key] || ""; });
+    }
+    function saveSiteContentDraft() {
+    const fields = { landingEyebrow: "site-landing-eyebrow", landingTag: "site-landing-tag", landingTagEn: "site-landing-tag-en", landingBadge: "site-landing-badge", landingBadgeEn: "site-landing-badge-en", filterTitle: "site-filter-title", filterSubtitle: "site-filter-subtitle", filterSubtitleEn: "site-filter-subtitle-en", locationTitle: "site-location-title", locationBody: "site-location-body", locationEn: "site-location-en", contactTitle: "site-contact-title", contactBody: "site-contact-body", contactEn: "site-contact-en" };
+    Object.keys(fields).forEach(function(key) { const el = $(fields[key]); if (el) siteContent[key] = el.value.trim(); });
+    applySiteContent(siteContent);
+    saveDraft();
+    const status = $("siteContentStatus");
+    if (status) status.textContent = "تم حفظ مسودة النصوص. اضغط نشر المنتجات لنشرها للزوار.";
+    }
+    
 function saveDraft() {
   try {
     const payload = {
       categories: categories.slice(),
       products: products.map(normalizeProduct),
+      siteContent: Object.assign({}, siteContent),
       savedAt: new Date().toISOString()
     };
     return idbSet(IDB_KEY, payload).catch(function(err){ console.warn("saveDraft", err); });
@@ -2433,6 +2478,7 @@ async function loadDraft() {
     if (data && typeof data === "object" && Array.isArray(data.products)) {
       products = data.products.map(normalizeProduct);
       categories = Array.isArray(data.categories) ? data.categories.filter(Boolean) : [];
+      if (data.siteContent) applySiteContent(data.siteContent);
       normalizeCatalog();
       return true;
     }
@@ -2442,6 +2488,7 @@ async function loadDraft() {
 
 /* ---------- catalog load (source of truth for visitors) ---------- */
 function applyBaked() {
+  applySiteContent(defaultSiteContent);
   categories = (defaultCategories || []).slice();
   products = JSON.parse(JSON.stringify(defaultProducts || [])).map(normalizeProduct);
   normalizeCatalog();
@@ -2456,6 +2503,7 @@ function normalizeCatalog() {
 }
 function applyRemote(data) {
   if (!data || typeof data !== "object") return false;
+  if (data.siteContent) applySiteContent(data.siteContent);
   if (Array.isArray(data.categories)) categories = data.categories.filter(Boolean);
   if (Array.isArray(data.products)) products = data.products.map(normalizeProduct);
   else if (Array.isArray(data)) products = data.map(normalizeProduct);
@@ -3104,6 +3152,7 @@ async function enterAdmin() {
   resetEditor();
   renderCatList();
   renderAdminList();
+  renderSiteContentEditor();
   fillCatSelect();
 }
 async function closeAdmin() {
@@ -3429,7 +3478,7 @@ async function publishSite() {
   const token = (() => { try { return sessionStorage.getItem(AUTH_KEY) || ""; } catch (e) { return ""; } })();
   if (!token) { alert("انتهت جلسة الإدارة. افتح لوحة الإدارة وسجّل الدخول مرة أخرى."); return; }
   saveDraft();
-  const payload = { categories: categories.slice(), products: products.map(normalizeProduct), updatedAt: new Date().toISOString() };
+  const payload = { categories: categories.slice(), products: products.map(normalizeProduct), siteContent: Object.assign({}, siteContent), updatedAt: new Date().toISOString() };
   if (btn) { btn.dataset.publishing = "1"; btn.disabled = true; btn.textContent = "جاري النشر…"; }
   setPublishStatus("جاري نشر المنتجات مباشرة… (" + products.length + " منتج)");
   try {
@@ -3454,6 +3503,7 @@ function exportProducts() {
   const payload = {
     categories: categories.slice(),
     products: products.map(normalizeProduct),
+    siteContent: Object.assign({}, siteContent),
     updatedAt: new Date().toISOString()
   };
   downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }), "khatem-backup.json");
@@ -3623,6 +3673,8 @@ function bindUI() {
   if (vurl) vurl.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addVideoUrl(); } });
   if (mediaFiles) mediaFiles.addEventListener("change", e => uploadEditorMedia(e.target.files));
 
+  const saveSite = $("btnSaveSiteContent");
+  if (saveSite) saveSite.addEventListener("click", saveSiteContentDraft);
   const pub = $("btnPublish");
   if (pub) pub.addEventListener("click", publishSite);
   const exp = $("btnExport");
