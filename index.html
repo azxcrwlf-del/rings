@@ -450,7 +450,8 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 .product-video iframe,.product-video video{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000}
 .product-video-link{display:block;padding:14px 16px;color:var(--teal);font-weight:600;text-decoration:none;background:#fff}
 .product-video-link:hover{color:var(--gold)}
-.filter-groups-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.filter-groups-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.filter-accordion{align-self:start;height:max-content}
 .filter-accordion{border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.72);overflow:hidden}
 .filter-accordion>.group-label{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;margin:0;cursor:pointer;list-style:none;color:var(--teal);font-size:14px}
 .filter-accordion>.group-label::-webkit-details-marker{display:none}
@@ -3338,7 +3339,21 @@ function stopParticles() {
 }
 
 /* ---------- bind UI ---------- */
+function setupFilterAccordions() {
+  const accordions = document.querySelectorAll(".filter-accordion");
+  accordions.forEach(current => {
+    if (current.dataset.accordionBound === "1") return;
+    current.dataset.accordionBound = "1";
+    current.addEventListener("toggle", () => {
+      if (!current.open) return;
+      accordions.forEach(other => {
+        if (other !== current) other.open = false;
+      });
+    });
+  });
+}
 function bindUI() {
+  setupFilterAccordions();
   const browse = $("browseBtn");
   if (browse) browse.addEventListener("click", goFilter);
 
