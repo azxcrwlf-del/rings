@@ -2503,6 +2503,7 @@ function normalizeCatalog() {
 }
 function applyRemote(data) {
   if (!data || typeof data !== "object") return false;
+  if (Array.isArray(data.products) && data.products.length === 0 && Array.isArray(data.categories) && data.categories.length === 0 && !data.siteContent) return false;
   if (data.siteContent) applySiteContent(data.siteContent);
   if (Array.isArray(data.categories)) categories = data.categories.filter(Boolean);
   if (Array.isArray(data.products)) products = data.products.map(normalizeProduct);
