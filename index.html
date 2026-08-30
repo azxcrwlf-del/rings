@@ -450,6 +450,20 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 .product-video iframe,.product-video video{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000}
 .product-video-link{display:block;padding:14px 16px;color:var(--teal);font-weight:600;text-decoration:none;background:#fff}
 .product-video-link:hover{color:var(--gold)}
+.filter-groups-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.filter-accordion{border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.72);overflow:hidden}
+.filter-accordion>.group-label{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;margin:0;cursor:pointer;list-style:none;color:var(--teal);font-size:14px}
+.filter-accordion>.group-label::-webkit-details-marker{display:none}
+.filter-accordion>.group-label::after{content:"+";font-family:Arial,sans-serif;font-size:20px;font-weight:400;color:var(--gold);line-height:1}
+.filter-accordion[open]>.group-label::after{content:"−"}
+.filter-accordion[open]>.group-label{border-bottom:1px solid var(--line);background:rgba(201,182,114,.08)}
+.filter-accordion>.hint{padding:10px 14px 0;margin:0}
+.filter-accordion>.size-grid,.filter-accordion>.cat-grid,.filter-accordion>.weight-grid,.filter-accordion>.gender-grid{padding:12px 14px 14px}
+.weight-grid,.gender-grid{display:flex;flex-wrap:wrap;gap:8px}
+.budget-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 14px}
+.budget-fields input{width:100%;min-width:0;border:1px solid var(--line);background:#fff;padding:11px 12px;outline:0;font-family:inherit;border-radius:8px;direction:ltr;text-align:left}
+.product-meta{font-size:12px;color:var(--muted);margin-top:5px}
+@media(max-width:700px){.filter-groups-grid{grid-template-columns:1fr}.budget-fields{grid-template-columns:1fr 1fr}}
 .size-btn{min-width:48px;padding:10px 14px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:.2s;border-radius:999px}
 .size-btn:hover{border-color:var(--gold);transform:translateY(-1px)}
 .size-btn.selected{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 6px 14px rgba(10,42,36,.25)}
@@ -1828,17 +1842,37 @@ img {
   </nav>
   <div class="filter-wrap">
     <h1>اختر ما يناسبك</h1>
-    <p class="sub">حدّد المقاس والتصنيف لنعرض لك القطع المناسبة<br><span class="en">Pick size and category to see matching pieces</span></p>
+    <p class="sub">حدّد المواصفات والميزانية لنعرض لك القطع المناسبة<br><span class="en">Choose size, category, weight, audience and budget</span></p>
     <div class="filter-card">
-      <div class="filter-group">
-        <label class="group-label">المقاس <span class="en">Ring size</span></label>
-        <p class="hint">اختر مقاساً واحداً أو أكثر. إن لم تختر شيئاً سنعرض كل المقاسات.</p>
-        <div class="size-grid" id="filterSizes"></div>
-      </div>
-      <div class="filter-group" id="filterCatGroup">
-        <label class="group-label">التصنيف <span class="en">Category</span></label>
-        <p class="hint">اختر تصنيفاً أو أكثر. إن لم تختر شيئاً سنعرض كل التصنيفات.</p>
-        <div class="cat-grid" id="filterCats"></div>
+      <div class="filter-groups-grid">
+        <details class="filter-group filter-accordion">
+          <summary class="group-label">المقاس <span class="en">Ring size</span></summary>
+          <p class="hint">اختر مقاساً واحداً أو أكثر. إن لم تختر شيئاً سنعرض كل المقاسات.</p>
+          <div class="size-grid" id="filterSizes"></div>
+        </details>
+        <details class="filter-group filter-accordion" id="filterCatGroup">
+          <summary class="group-label">التصنيف <span class="en">Category</span></summary>
+          <p class="hint">التصنيفات القديمة — اضغط لفتح الاختيارات.</p>
+          <div class="cat-grid" id="filterCats"></div>
+        </details>
+        <details class="filter-group filter-accordion" id="filterWeightGroup">
+          <summary class="group-label">الوزن <span class="en">Weight</span></summary>
+          <p class="hint">اختر الوزن بالغرام، بخطوات 5 غ من 5 إلى 30.</p>
+          <div class="weight-grid" id="filterWeights"></div>
+        </details>
+        <details class="filter-group filter-accordion" id="filterGenderGroup">
+          <summary class="group-label">الفئة <span class="en">For</span></summary>
+          <p class="hint">اختر خواتم الرجال أو النساء.</p>
+          <div class="gender-grid" id="filterGenders"></div>
+        </details>
+        <details class="filter-group filter-accordion" id="filterBudgetGroup">
+          <summary class="group-label">الميزانية <span class="en">Budget</span></summary>
+          <p class="hint">حدد أقل وأعلى مبلغ يريد العميل إنفاقه.</p>
+          <div class="budget-fields">
+            <input type="number" id="filterBudgetMin" min="0" step="100" placeholder="الأقل (دج)" inputmode="numeric">
+            <input type="number" id="filterBudgetMax" min="0" step="100" placeholder="الأعلى (دج)" inputmode="numeric">
+          </div>
+        </details>
       </div>
       <div class="filter-actions">
         <button type="button" class="btn-primary" id="btnApplyFilter">عرض النتائج</button>
@@ -2082,6 +2116,20 @@ img {
             <input id="ap-price" placeholder="مثال: 4500 دج" required>
           </div>
         </div>
+        <div class="row">
+          <div>
+            <label>الوزن (غرام)</label>
+            <input id="ap-weight" type="number" min="5" max="30" step="5" placeholder="5، 10، 15…">
+          </div>
+          <div>
+            <label>الفئة</label>
+            <select id="ap-gender">
+              <option value="all">رجال ونساء</option>
+              <option value="men">رجال</option>
+              <option value="women">نساء</option>
+            </select>
+          </div>
+        </div>
         <div>
           <label>الاسم</label>
           <input id="ap-name" placeholder="مثال: خاتم عقيق يمني" required>
@@ -2170,7 +2218,7 @@ let selected = null;
 let editorImages = [];
 let editorVideos = [];
 let editorSizes = [];
-let activeFilter = { sizes: [], cats: [], showAll: false };
+let activeFilter = { sizes: [], cats: [], weights: [], genders: [], budgetMin: "", budgetMax: "", showAll: false };
 let galleryIdx = 0;
 let galleryImages = [];
 let idbInstance = null;
@@ -2183,6 +2231,8 @@ function normalizeProduct(p) {
     cat: (p.cat || "").trim(),
     name: (p.name || "").trim(),
     price: (p.price || "").trim(),
+    weight: Math.max(0, Number(p.weight) || 0),
+    gender: ["men", "women"].indexOf(p.gender) >= 0 ? p.gender : "all",
     images: Array.isArray(p.images) ? p.images.filter(Boolean) : [],
     videos: Array.isArray(p.videos) ? p.videos.map(v => String(v || "").trim()).filter(Boolean) : [],
     inStock: p.inStock !== false,
@@ -2386,9 +2436,26 @@ function handleRoute() {
 }
 
 /* ---------- filter / results ---------- */
+function parsePrice(value) {
+  const cleaned = String(value || "").replace(/[^0-9.,]/g, "").replace(/,/g, ".");
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
+function genderLabel(value) {
+  return value === "men" ? "رجال" : value === "women" ? "نساء" : "رجال ونساء";
+}
+function syncBudgetFilter() {
+  const min = $("filterBudgetMin");
+  const max = $("filterBudgetMax");
+  activeFilter.budgetMin = min ? min.value.trim() : "";
+  activeFilter.budgetMax = max ? max.value.trim() : "";
+  activeFilter.showAll = false;
+}
 function buildFilterUI() {
   const sizeBox = $("filterSizes");
   const catBox = $("filterCats");
+  const weightBox = $("filterWeights");
+  const genderBox = $("filterGenders");
   if (!sizeBox) return;
   sizeBox.innerHTML = "";
   ALL_SIZES.forEach(sz => {
@@ -2397,6 +2464,7 @@ function buildFilterUI() {
     b.className = "size-btn" + (activeFilter.sizes.indexOf(sz) >= 0 ? " selected" : "");
     b.textContent = sz;
     b.onclick = () => {
+      activeFilter.showAll = false;
       const i = activeFilter.sizes.indexOf(sz);
       if (i >= 0) activeFilter.sizes.splice(i, 1);
       else activeFilter.sizes.push(sz);
@@ -2415,6 +2483,7 @@ function buildFilterUI() {
       b.className = "size-btn" + (activeFilter.cats.indexOf(c) >= 0 ? " selected" : "");
       b.textContent = c;
       b.onclick = () => {
+        activeFilter.showAll = false;
         const i = activeFilter.cats.indexOf(c);
         if (i >= 0) activeFilter.cats.splice(i, 1);
         else activeFilter.cats.push(c);
@@ -2423,6 +2492,44 @@ function buildFilterUI() {
       catBox.appendChild(b);
     });
   }
+  if (weightBox) {
+    weightBox.innerHTML = "";
+    [5, 10, 15, 20, 25, 30].forEach(weight => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "size-btn" + (activeFilter.weights.indexOf(weight) >= 0 ? " selected" : "");
+      b.textContent = weight + " غ";
+      b.onclick = () => {
+        activeFilter.showAll = false;
+        const i = activeFilter.weights.indexOf(weight);
+        if (i >= 0) activeFilter.weights.splice(i, 1);
+        else activeFilter.weights.push(weight);
+        buildFilterUI();
+      };
+      weightBox.appendChild(b);
+    });
+  }
+  if (genderBox) {
+    genderBox.innerHTML = "";
+    [{ value: "men", label: "رجال" }, { value: "women", label: "نساء" }].forEach(option => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "size-btn" + (activeFilter.genders.indexOf(option.value) >= 0 ? " selected" : "");
+      b.textContent = option.label;
+      b.onclick = () => {
+        activeFilter.showAll = false;
+        const i = activeFilter.genders.indexOf(option.value);
+        if (i >= 0) activeFilter.genders.splice(i, 1);
+        else activeFilter.genders.push(option.value);
+        buildFilterUI();
+      };
+      genderBox.appendChild(b);
+    });
+  }
+  const min = $("filterBudgetMin");
+  const max = $("filterBudgetMax");
+  if (min) min.value = activeFilter.budgetMin;
+  if (max) max.value = activeFilter.budgetMax;
 }
 function productHasSize(p, sizes) {
   if (!sizes.length) return true;
@@ -2430,16 +2537,36 @@ function productHasSize(p, sizes) {
 }
 function getFilteredProducts() {
   if (activeFilter.showAll) return products.slice();
+  let minBudget = Number(activeFilter.budgetMin) || 0;
+  let maxBudget = Number(activeFilter.budgetMax) || 0;
+  if (minBudget && maxBudget && minBudget > maxBudget) {
+    const swap = minBudget; minBudget = maxBudget; maxBudget = swap;
+  }
   return products.filter(p => {
     if (!p.inStock) return false;
     if (activeFilter.cats.length && activeFilter.cats.indexOf(p.cat) < 0) return false;
+    if (activeFilter.weights.length && activeFilter.weights.indexOf(p.weight) < 0) return false;
+    if (activeFilter.genders.length && !activeFilter.genders.some(g => p.gender === g || p.gender === "all")) return false;
+    const price = parsePrice(p.price);
+    if (minBudget && (!price || price < minBudget)) return false;
+    if (maxBudget && (!price || price > maxBudget)) return false;
     if (!productHasSize(p, activeFilter.sizes)) return false;
     return true;
   });
 }
 function applyFilter(showAll) {
   activeFilter.showAll = !!showAll;
-  if (showAll) { activeFilter.sizes = []; activeFilter.cats = []; }
+  if (showAll) {
+    activeFilter.sizes = [];
+    activeFilter.cats = [];
+    activeFilter.weights = [];
+    activeFilter.genders = [];
+    activeFilter.budgetMin = "";
+    activeFilter.budgetMax = "";
+    buildFilterUI();
+  } else {
+    syncBudgetFilter();
+  }
   const matched = getFilteredProducts();
   renderResults(matched);
   goResults();
@@ -2503,6 +2630,7 @@ function appendResultBatch() {
     const src = thumbUrl(p);
     const sizeNames = (p.sizes || []).filter(s => s.stock).map(s => s.name).join(" · ");
     const oos = p.inStock ? "" : '<span class="badge-oos">غير متوفر</span>';
+    const meta = [p.weight ? p.weight + " غ" : "", p.gender && p.gender !== "all" ? genderLabel(p.gender) : ""].filter(Boolean).join(" · ");
 
     let imgHtml;
     if (src) {
@@ -2517,6 +2645,7 @@ function appendResultBatch() {
       (p.cat ? '<div class="product-cat">' + escapeHtml(p.cat) + '</div>' : '') +
       '<div class="product-name">' + escapeHtml(p.name) + oos + '</div>' +
       '<div class="product-price">' + escapeHtml(p.price) + '</div>' +
+      (meta ? '<div class="product-meta">' + escapeHtml(meta) + '</div>' : '') +
       (sizeNames ? '<div class="product-sizes">المقاسات: ' + escapeHtml(sizeNames) + '</div>' : '') +
       '</div></div>';
 
@@ -2904,6 +3033,8 @@ function resetEditor() {
   $("ap-name").value = "";
   $("ap-price").value = "";
   $("ap-cat").value = "";
+  $("ap-weight").value = "";
+  $("ap-gender").value = "all";
   $("ap-instock").checked = true;
   editorImages = [];
   editorVideos = [];
@@ -3016,6 +3147,8 @@ function editProduct(idx) {
   $("ap-name").value = p.name;
   $("ap-price").value = p.price;
   $("ap-cat").value = p.cat;
+  $("ap-weight").value = p.weight || "";
+  $("ap-gender").value = p.gender || "all";
   $("ap-instock").checked = p.inStock;
   editorImages = p.images.slice();
   editorVideos = p.videos.slice();
@@ -3032,6 +3165,8 @@ function saveProduct(e) {
     cat: $("ap-cat").value,
     name: $("ap-name").value,
     price: $("ap-price").value,
+    weight: $("ap-weight").value,
+    gender: $("ap-gender").value,
     images: editorImages.slice(),
     videos: editorVideos.slice(),
     inStock: $("ap-instock").checked,
@@ -3188,6 +3323,10 @@ function bindUI() {
   if (bf) bf.addEventListener("click", () => applyFilter(false));
   const ba = $("btnShowAll");
   if (ba) ba.addEventListener("click", () => applyFilter(true));
+  const budgetMin = $("filterBudgetMin");
+  const budgetMax = $("filterBudgetMax");
+  if (budgetMin) budgetMin.addEventListener("input", syncBudgetFilter);
+  if (budgetMax) budgetMax.addEventListener("input", syncBudgetFilter);
 
   const co = $("btnCloseOrder");
   if (co) co.addEventListener("click", closeOrder);
