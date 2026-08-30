@@ -1829,6 +1829,16 @@ img {
   #landing .landing-badge { margin-top:clamp(10px,2vh,18px); font-size:11px; }
 }
 </style>
+<style>
+/* Social contact buttons */
+.info .social-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:12px; }
+.info .social-row .wa, .info .social-row .social-btn { margin-top:0 !important; }
+.info .social-btn { display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:10px 16px; border-radius:999px; color:var(--teal-deep); font-weight:600; font-size:13px; text-decoration:none; box-shadow:0 8px 20px rgba(201,182,114,.2); transition:transform .2s, filter .2s; }
+.info .social-btn:hover { transform:translateY(-2px); filter:brightness(1.06); }
+.info .social-btn.instagram { background:linear-gradient(120deg,#f8d06f,#e1306c 58%,#833ab4); color:#fff; }
+.info .social-btn.facebook { background:#1877f2; color:#fff; }
+@media (max-width:600px) { .info .social-row { gap:7px; } .info .social-btn { padding:9px 13px; font-size:12px; } }
+</style>
 </head>
 <body>
 
@@ -1919,7 +1929,11 @@ img {
         <h2>تواصل معنا</h2>
         <p>للاستفسار عن الأحجار أو المقاسات أو الطلبات الخاصة</p>
         <span class="en">Questions about stones, sizing or custom orders</span>
-        <div><a class="wa" href="https://wa.me/213557043712" target="_blank" rel="noopener">واتساب · 0557043712</a></div>
+        <div><div class="social-row">
+          <a class="wa" href="https://wa.me/213557043712" target="_blank" rel="noopener">واتساب · 0557043712</a>
+          <a class="social-btn instagram" href="https://www.instagram.com/khatem_ali_?igsi=NHNsbWZub2VsMXM4" target="_blank" rel="noopener">إنستغرام</a>
+          <a class="social-btn facebook" href="https://www.facebook.com/profile.php?id=100090969184827" target="_blank" rel="noopener">فيسبوك</a>
+        </div></div>
       </div>
     </div>
   </section>
@@ -1952,7 +1966,11 @@ img {
       <div>
         <h2>تواصل معنا</h2>
         <p>للاستفسار أو الطلب عبر واتساب</p>
-        <a class="wa" href="https://wa.me/213557043712" target="_blank" rel="noopener">واتساب · 0557043712</a>
+        <div class="social-row">
+          <a class="wa" href="https://wa.me/213557043712" target="_blank" rel="noopener">واتساب · 0557043712</a>
+          <a class="social-btn instagram" href="https://www.instagram.com/khatem_ali_?igsi=NHNsbWZub2VsMXM4" target="_blank" rel="noopener">إنستغرام</a>
+          <a class="social-btn facebook" href="https://www.facebook.com/profile.php?id=100090969184827" target="_blank" rel="noopener">فيسبوك</a>
+        </div>
       </div>
       <div>
         <h2>الموقع</h2>
