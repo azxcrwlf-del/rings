@@ -1847,6 +1847,18 @@ img {
 .info .social-btn.tiktok:hover { background:#000; }
 @media (max-width:600px) { .info .social-logo { padding:9px 11px; } .info .social-icon { width:19px; height:19px; flex-basis:19px; } }
 </style>
+<style>
+/* Compact customer filter space */
+.filter-card { padding:24px 18px !important; }
+.filter-groups-grid { gap:8px !important; }
+.filter-accordion > .group-label { padding:10px 12px !important; }
+.filter-accordion > .hint { padding:7px 12px 0 !important; }
+.filter-accordion > .size-grid, .filter-accordion > .weight-grid, .filter-accordion > .budget-fields { padding:9px 12px 11px !important; }
+@media (max-width:700px) {
+  .filter-card { padding:16px 12px !important; border-radius:18px !important; }
+  .filter-groups-grid { gap:7px !important; }
+}
+</style>
 </head>
 <body>
 
@@ -1887,7 +1899,7 @@ img {
   </nav>
   <div class="filter-wrap">
     <h1>اختر ما يناسبك</h1>
-    <p class="sub">حدّد المواصفات والميزانية لنعرض لك القطع المناسبة<br><span class="en">Choose size, category, weight, audience and budget</span></p>
+    <p class="sub">حدّد المواصفات والميزانية لنعرض لك القطع المناسبة<br><span class="en">Choose size, weight and budget</span></p>
     <div class="filter-card">
       <div class="filter-groups-grid">
         <details class="filter-group filter-accordion">
@@ -1895,20 +1907,10 @@ img {
           <p class="hint">اختر مقاساً واحداً أو أكثر. إن لم تختر شيئاً سنعرض كل المقاسات.</p>
           <div class="size-grid" id="filterSizes"></div>
         </details>
-        <details class="filter-group filter-accordion" id="filterCatGroup">
-          <summary class="group-label">نوع الحجر <span class="en">Stone type</span></summary>
-          <p class="hint">أنواع الأحجار — اضغط لفتح الاختيارات.</p>
-          <div class="cat-grid" id="filterCats"></div>
-        </details>
         <details class="filter-group filter-accordion" id="filterWeightGroup">
           <summary class="group-label">الوزن <span class="en">Weight</span></summary>
           <p class="hint">اختر نطاق الوزن: من 0 إلى 5 غ، ثم كل 5 غ حتى 30 غ.</p>
           <div class="weight-grid" id="filterWeights"></div>
-        </details>
-        <details class="filter-group filter-accordion" id="filterGenderGroup">
-          <summary class="group-label">الجنس <span class="en">Sex</span></summary>
-          <p class="hint">اختر: رجال أو نساء.</p>
-          <div class="gender-grid" id="filterGenders"></div>
         </details>
         <details class="filter-group filter-accordion" id="filterBudgetGroup">
           <summary class="group-label">الميزانية <span class="en">Budget</span></summary>
@@ -2285,7 +2287,7 @@ const AUTH_KEY = "khatemali_admin_auth";
 const IDB_NAME = "khatemAliDB";
 const IDB_STORE = "kv";
 const IDB_KEY = "appdata";
-const ALL_SIZES = ["40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76"];
+const ALL_SIZES = ["51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76"];
 const ALL_WEIGHTS = ["0-5", "5-10", "10-15", "15-20", "20-25", "25-30"];
 const WA_NUMBER = "213699069436";
 
