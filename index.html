@@ -438,6 +438,18 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 .admin-img-item .rm{position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:14px;line-height:22px;text-align:center;cursor:pointer;border:0}
 .admin-img-add{width:88px;height:88px;border:1px dashed var(--line);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:28px;color:var(--muted);background:#fff}
 .admin-img-add:hover{border-color:var(--gold);color:var(--gold)}
+.admin-media-list{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.admin-media-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}
+.admin-media-item .media-kind{font-size:11px;color:var(--gold);font-weight:700;white-space:nowrap}
+.admin-media-item .media-url{direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:12px;color:var(--muted)}
+.admin-media-item .rm{width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:14px;line-height:24px;text-align:center;cursor:pointer;border:0;flex:0 0 auto}
+.product-videos{padding:0 22px 22px}
+.product-videos-title{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:10px}
+.product-videos-list{display:grid;gap:12px}
+.product-video{overflow:hidden;border-radius:10px;background:#e8e4dc;border:1px solid var(--line)}
+.product-video iframe,.product-video video{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000}
+.product-video-link{display:block;padding:14px 16px;color:var(--teal);font-weight:600;text-decoration:none;background:#fff}
+.product-video-link:hover{color:var(--gold)}
 .size-btn{min-width:48px;padding:10px 14px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:.2s;border-radius:999px}
 .size-btn:hover{border-color:var(--gold);transform:translateY(-1px)}
 .size-btn.selected{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 6px 14px rgba(10,42,36,.25)}
@@ -1915,6 +1927,10 @@ img {
       <div class="gallery-count" id="galleryCount" style="display:none"></div>
     </div>
     <div class="gallery-thumbs" id="galleryThumbs"></div>
+    <div class="product-videos" id="productVideos" style="display:none">
+      <div class="product-videos-title">فيديوهات المنتج</div>
+      <div class="product-videos-list" id="productVideosList"></div>
+    </div>
     <div class="detail-body">
       <div class="option-block" id="sizeBlock">
         <span class="option-label">المقاس</span>
@@ -2079,6 +2095,15 @@ img {
           </div>
           <p class="admin-note">الصق رابط الصورة من خدمة التخزين (https://...). الصورة الأولى تظهر في القائمة. لا تُضمّن الصور داخل JSON.</p>
         </div>
+          <div>
+          <label>الفيديوهات</label>
+          <div class="admin-media-list" id="ap-videos"></div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
+            <input type="url" id="ap-video-url" placeholder="https://youtube.com/... أو https://.../video.mp4" inputmode="url" autocomplete="off" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;direction:ltr;text-align:left">
+            <button type="button" class="admin-btn secondary" id="ap-video-add">إضافة رابط</button>
+          </div>
+          <p class="admin-note">أضف رابط YouTube أو Vimeo أو ملف فيديو مباشر (MP4/WebM). سيظهر الفيديو داخل صفحة المنتج.</p>
+        </div>
         <div>
           <label><input type="checkbox" id="ap-instock" checked> متوفر</label>
         </div>
@@ -2143,6 +2168,7 @@ let categories = [];
 let products = [];
 let selected = null;
 let editorImages = [];
+let editorVideos = [];
 let editorSizes = [];
 let activeFilter = { sizes: [], cats: [], showAll: false };
 let galleryIdx = 0;
@@ -2158,6 +2184,7 @@ function normalizeProduct(p) {
     name: (p.name || "").trim(),
     price: (p.price || "").trim(),
     images: Array.isArray(p.images) ? p.images.filter(Boolean) : [],
+    videos: Array.isArray(p.videos) ? p.videos.map(v => String(v || "").trim()).filter(Boolean) : [],
     inStock: p.inStock !== false,
     sizes: Array.isArray(p.sizes)
       ? p.sizes.map(s => ({ name: String(s.name || s).trim(), stock: s.stock !== false })).filter(s => s.name)
@@ -2527,6 +2554,70 @@ function escapeHtml(s) {
 }
 
 /* ---------- product modal ---------- */
+function getVideoSource(raw) {
+  const value = String(raw || "").trim();
+  if (!value) return null;
+  let u;
+  try { u = new URL(value); } catch (e) { return null; }
+  if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+  const host = u.hostname.toLowerCase().replace(/^www\./, "");
+  let id = "";
+  if (host === "youtu.be") {
+    id = u.pathname.split("/").filter(Boolean)[0] || "";
+  } else if (host === "youtube.com" || host === "m.youtube.com") {
+    id = u.searchParams.get("v") || "";
+    if (!id) {
+      const match = u.pathname.match(/\/(?:embed|shorts|live)\/([^/?#]+)/);
+      id = match ? match[1] : "";
+    }
+  }
+  if (id) return { kind: "embed", src: "https://www.youtube.com/embed/" + encodeURIComponent(id) + "?rel=0" };
+  if (host === "vimeo.com" || host === "player.vimeo.com") {
+    const match = u.pathname.match(/\/(?:video\/)?(\d+)/);
+    if (match) return { kind: "embed", src: "https://player.vimeo.com/video/" + match[1] };
+  }
+  if (/\.(mp4|webm|ogg)(?:$|[?#])/i.test(u.pathname + u.search)) return { kind: "file", src: u.href };
+  return { kind: "link", src: u.href };
+}
+function renderProductVideos(videos) {
+  const wrap = $("productVideos");
+  const list = $("productVideosList");
+  if (!wrap || !list) return;
+  list.innerHTML = "";
+  const sources = (videos || []).map(getVideoSource).filter(Boolean);
+  if (!sources.length) { wrap.style.display = "none"; return; }
+  sources.forEach((video, i) => {
+    const card = document.createElement("div");
+    card.className = "product-video";
+    if (video.kind === "embed") {
+      const frame = document.createElement("iframe");
+      frame.src = video.src;
+      frame.title = (selected && selected.name ? selected.name : "فيديو المنتج") + " - " + (i + 1);
+      frame.loading = "lazy";
+      frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+      frame.allowFullscreen = true;
+      card.appendChild(frame);
+    } else if (video.kind === "file") {
+      const player = document.createElement("video");
+      player.src = video.src;
+      player.controls = true;
+      player.playsInline = true;
+      player.preload = "metadata";
+      card.appendChild(player);
+    } else {
+      const link = document.createElement("a");
+      link.className = "product-video-link";
+      link.href = video.src;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "مشاهدة الفيديو ↗";
+      card.appendChild(link);
+    }
+    list.appendChild(card);
+  });
+  wrap.style.display = "";
+}
+
 function openProduct(p) {
   selected = normalizeProduct(p);
   galleryImages = selected.images.slice();
@@ -2539,6 +2630,7 @@ function openProduct(p) {
   if ($("orderBaladiya")) $("orderBaladiya").value = "";
   $("orderNote").value = "";
   showGalleryAt(0);
+  renderProductVideos(selected.videos);
   const sizeBox = $("sizeOptions");
   sizeBox.innerHTML = "";
   const sizes = (selected.sizes || []).filter(s => s.stock);
@@ -2814,8 +2906,10 @@ function resetEditor() {
   $("ap-cat").value = "";
   $("ap-instock").checked = true;
   editorImages = [];
+  editorVideos = [];
   editorSizes = [];
   renderEditorImages();
+  renderEditorVideos();
   renderEditorSizes();
 }
 function renderEditorImages() {
@@ -2836,6 +2930,39 @@ function renderEditorImages() {
   add.textContent = "+";
   add.onclick = () => { const input = $("ap-img-url"); if (input) { input.focus(); input.scrollIntoView({ behavior: "smooth", block: "center" }); } };
   box.appendChild(add);
+}
+function renderEditorVideos() {
+  const box = $("ap-videos");
+  if (!box) return;
+  box.innerHTML = "";
+  editorVideos.forEach((src, i) => {
+    const row = document.createElement("div");
+    row.className = "admin-media-item";
+    const kind = document.createElement("span");
+    kind.className = "media-kind";
+    kind.textContent = getVideoSource(src)?.kind === "embed" ? "تضمين" : "رابط";
+    const label = document.createElement("span");
+    label.className = "media-url";
+    label.textContent = src;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "rm";
+    remove.textContent = "×";
+    remove.setAttribute("aria-label", "حذف الفيديو");
+    remove.onclick = () => { editorVideos.splice(i, 1); renderEditorVideos(); };
+    row.append(kind, label, remove);
+    box.appendChild(row);
+  });
+}
+function addVideoUrl() {
+  const input = $("ap-video-url");
+  const raw = input ? input.value.trim() : "";
+  const parsed = getVideoSource(raw);
+  if (!parsed) { alert("أدخل رابط فيديو صحيح يبدأ بـ https:// أو http://"); return; }
+  if (editorVideos.indexOf(raw) >= 0) { alert("تمت إضافة هذا الرابط من قبل"); return; }
+  editorVideos.push(raw);
+  if (input) input.value = "";
+  renderEditorVideos();
 }
 function renderEditorSizes() {
   const box = $("ap-sizes");
@@ -2891,8 +3018,10 @@ function editProduct(idx) {
   $("ap-cat").value = p.cat;
   $("ap-instock").checked = p.inStock;
   editorImages = p.images.slice();
+  editorVideos = p.videos.slice();
   editorSizes = p.sizes.map(s => ({ name: s.name, stock: s.stock }));
   renderEditorImages();
+  renderEditorVideos();
   renderEditorSizes();
   $("productEditor").scrollIntoView({ behavior: "smooth" });
 }
@@ -2904,6 +3033,7 @@ function saveProduct(e) {
     name: $("ap-name").value,
     price: $("ap-price").value,
     images: editorImages.slice(),
+    videos: editorVideos.slice(),
     inStock: $("ap-instock").checked,
     sizes: editorSizes.slice()
   });
@@ -3093,8 +3223,12 @@ function bindUI() {
   if (apc) apc.addEventListener("click", resetEditor);
   const aurl = $("ap-img-url");
   const aadd = $("ap-img-add");
+  const vurl = $("ap-video-url");
+  const vadd = $("ap-video-add");
   if (aadd) aadd.addEventListener("click", addImageUrl);
   if (aurl) aurl.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addImageUrl(); } });
+  if (vadd) vadd.addEventListener("click", addVideoUrl);
+  if (vurl) vurl.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addVideoUrl(); } });
 
   const pub = $("btnPublish");
   if (pub) pub.addEventListener("click", publishSite);
