@@ -461,8 +461,10 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 .filter-accordion>.hint{padding:10px 14px 0;margin:0}
 .filter-accordion>.size-grid,.filter-accordion>.cat-grid,.filter-accordion>.weight-grid,.filter-accordion>.gender-grid{padding:12px 14px 14px}
 .weight-grid,.gender-grid{display:flex;flex-wrap:wrap;gap:8px}
-.budget-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 14px}
-.budget-fields input{width:100%;min-width:0;border:1px solid var(--line);background:#fff;padding:11px 12px;outline:0;font-family:inherit;border-radius:8px;direction:ltr;text-align:left}
+.budget-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px 14px 14px}
+.budget-btn{width:100%;padding:11px 10px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;transition:.2s;border-radius:8px;direction:ltr}
+.budget-btn:hover{border-color:var(--gold);transform:translateY(-1px)}
+.budget-btn.selected{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 6px 14px rgba(10,42,36,.25)}
 .product-meta{font-size:12px;color:var(--muted);margin-top:5px}
 @media(max-width:700px){.filter-groups-grid{grid-template-columns:1fr}.budget-fields{grid-template-columns:1fr 1fr}}
 .size-btn{min-width:48px;padding:10px 14px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:.2s;border-radius:999px}
@@ -1922,11 +1924,8 @@ img {
         </details>
         <details class="filter-group filter-accordion" id="filterBudgetGroup">
           <summary class="group-label">الميزانية <span class="en">Budget</span></summary>
-          <p class="hint">حدد أقل وأعلى مبلغ يريد العميل إنفاقه.</p>
-          <div class="budget-fields">
-            <input type="number" id="filterBudgetMin" min="0" step="100" placeholder="الأقل (دج)" inputmode="numeric">
-            <input type="number" id="filterBudgetMax" min="0" step="100" placeholder="الأعلى (دج)" inputmode="numeric">
-          </div>
+          <p class="hint">اختر نطاق السعر، ابتداءً من 10,000 دج وبزيادة 5,000 دج لكل فئة.</p>
+          <div class="budget-fields" id="filterBudget"></div>
         </details>
       </div>
       <div class="filter-actions">
@@ -2295,6 +2294,17 @@ const IDB_STORE = "kv";
 const IDB_KEY = "appdata";
 const ALL_SIZES = ["51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76"];
 const ALL_WEIGHTS = ["0-10", "10-20", "20-30", "above30"];
+const ALL_BUDGETS = [
+  { min: 10000, max: 15000, label: "10,000 – 15,000 دج" },
+  { min: 15000, max: 20000, label: "15,000 – 20,000 دج" },
+  { min: 20000, max: 25000, label: "20,000 – 25,000 دج" },
+  { min: 25000, max: 30000, label: "25,000 – 30,000 دج" },
+  { min: 30000, max: 35000, label: "30,000 – 35,000 دج" },
+  { min: 35000, max: 40000, label: "35,000 – 40,000 دج" },
+  { min: 40000, max: 45000, label: "40,000 – 45,000 دج" },
+  { min: 45000, max: 50000, label: "45,000 – 50,000 دج" },
+  { min: 50000, max: null, label: "50,000+ دج" }
+];
 const WA_NUMBER = "213699069436";
 
 const defaultCategories = [];
@@ -2565,10 +2575,6 @@ function genderLabel(value) {
   return value === "men" ? "رجال" : value === "women" ? "نساء" : "رجال ونساء";
 }
 function syncBudgetFilter() {
-  const min = $("filterBudgetMin");
-  const max = $("filterBudgetMax");
-  activeFilter.budgetMin = min ? min.value.trim() : "";
-  activeFilter.budgetMax = max ? max.value.trim() : "";
   activeFilter.showAll = false;
 }
 function buildFilterUI() {
@@ -2576,6 +2582,7 @@ function buildFilterUI() {
   const catBox = $("filterCats");
   const weightBox = $("filterWeights");
   const genderBox = $("filterGenders");
+  const budgetBox = $("filterBudget");
   if (!sizeBox) return;
   sizeBox.innerHTML = "";
   ALL_SIZES.forEach(sz => {
@@ -2646,10 +2653,22 @@ function buildFilterUI() {
       genderBox.appendChild(b);
     });
   }
-  const min = $("filterBudgetMin");
-  const max = $("filterBudgetMax");
-  if (min) min.value = activeFilter.budgetMin;
-  if (max) max.value = activeFilter.budgetMax;
+  if (budgetBox) {
+    budgetBox.innerHTML = "";
+    ALL_BUDGETS.forEach(budget => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "budget-btn" + (String(budget.min) === String(activeFilter.budgetMin) && (budget.max == null ? !activeFilter.budgetMax : String(budget.max) === String(activeFilter.budgetMax)) ? " selected" : "");
+      b.textContent = budget.label;
+      b.onclick = () => {
+        activeFilter.showAll = false;
+        activeFilter.budgetMin = String(budget.min);
+        activeFilter.budgetMax = budget.max == null ? "" : String(budget.max);
+        buildFilterUI();
+      };
+      budgetBox.appendChild(b);
+    });
+  }
 }
 function productHasSize(p, sizes) {
   if (!sizes.length) return true;
@@ -3457,10 +3476,6 @@ function bindUI() {
   if (bf) bf.addEventListener("click", () => applyFilter(false));
   const ba = $("btnShowAll");
   if (ba) ba.addEventListener("click", () => applyFilter(true));
-  const budgetMin = $("filterBudgetMin");
-  const budgetMax = $("filterBudgetMax");
-  if (budgetMin) budgetMin.addEventListener("input", syncBudgetFilter);
-  if (budgetMax) budgetMax.addEventListener("input", syncBudgetFilter);
 
   const co = $("btnCloseOrder");
   if (co) co.addEventListener("click", closeOrder);
