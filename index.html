@@ -1862,18 +1862,18 @@ img {
           <div class="size-grid" id="filterSizes"></div>
         </details>
         <details class="filter-group filter-accordion" id="filterCatGroup">
-          <summary class="group-label">التصنيف <span class="en">Category</span></summary>
-          <p class="hint">التصنيفات القديمة — اضغط لفتح الاختيارات.</p>
+          <summary class="group-label">نوع الحجر <span class="en">Stone type</span></summary>
+          <p class="hint">أنواع الأحجار — اضغط لفتح الاختيارات.</p>
           <div class="cat-grid" id="filterCats"></div>
         </details>
         <details class="filter-group filter-accordion" id="filterWeightGroup">
           <summary class="group-label">الوزن <span class="en">Weight</span></summary>
-          <p class="hint">اختر الوزن بالغرام، بخطوات 5 غ من 5 إلى 30.</p>
+          <p class="hint">اختر نطاق الوزن: من 0 إلى 5 غ، ثم كل 5 غ حتى 30 غ.</p>
           <div class="weight-grid" id="filterWeights"></div>
         </details>
         <details class="filter-group filter-accordion" id="filterGenderGroup">
-          <summary class="group-label">الفئة <span class="en">For</span></summary>
-          <p class="hint">اختر خواتم الرجال أو النساء.</p>
+          <summary class="group-label">الجنس <span class="en">Sex</span></summary>
+          <p class="hint">اختر: رجال أو نساء.</p>
           <div class="gender-grid" id="filterGenders"></div>
         </details>
         <details class="filter-group filter-accordion" id="filterBudgetGroup">
@@ -2119,7 +2119,7 @@ img {
         <input type="hidden" id="ap-idx" value="-1">
         <div class="row">
           <div>
-            <label>التصنيف</label>
+            <label>نوع الحجر</label>
             <select id="ap-cat"></select>
           </div>
           <div>
@@ -2130,10 +2130,18 @@ img {
         <div class="row">
           <div>
             <label>الوزن (غرام)</label>
-            <input id="ap-weight" type="number" min="5" max="30" step="5" placeholder="5، 10، 15…">
+            <select id="ap-weight">
+              <option value="">— بدون وزن —</option>
+              <option value="0-5">0–5 غ</option>
+              <option value="5-10">5–10 غ</option>
+              <option value="10-15">10–15 غ</option>
+              <option value="15-20">15–20 غ</option>
+              <option value="20-25">20–25 غ</option>
+              <option value="25-30">25–30 غ</option>
+            </select>
           </div>
           <div>
-            <label>الفئة</label>
+            <label>الجنس</label>
             <select id="ap-gender">
               <option value="all">رجال ونساء</option>
               <option value="men">رجال</option>
@@ -2218,6 +2226,7 @@ const IDB_NAME = "khatemAliDB";
 const IDB_STORE = "kv";
 const IDB_KEY = "appdata";
 const ALL_SIZES = ["40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76"];
+const ALL_WEIGHTS = ["0-5", "5-10", "10-15", "15-20", "20-25", "25-30"];
 const WA_NUMBER = "213699069436";
 
 const defaultCategories = [];
@@ -2242,7 +2251,7 @@ function normalizeProduct(p) {
     cat: (p.cat || "").trim(),
     name: (p.name || "").trim(),
     price: (p.price || "").trim(),
-    weight: Math.max(0, Number(p.weight) || 0),
+    weight: normalizeWeight(p.weight),
     gender: ["men", "women"].indexOf(p.gender) >= 0 ? p.gender : "all",
     images: Array.isArray(p.images) ? p.images.filter(Boolean) : [],
     videos: Array.isArray(p.videos) ? p.videos.map(v => String(v || "").trim()).filter(Boolean) : [],
@@ -2251,6 +2260,18 @@ function normalizeProduct(p) {
       ? p.sizes.map(s => ({ name: String(s.name || s).trim(), stock: s.stock !== false })).filter(s => s.name)
       : []
   };
+}
+function normalizeWeight(value) {
+  const raw = String(value == null ? "" : value).trim().replace(/[–—]/g, "-");
+  if (ALL_WEIGHTS.indexOf(raw) >= 0) return raw;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0 || n > 30) return "";
+  if (n < 5) return "0-5";
+  if (n < 10) return "5-10";
+  if (n < 15) return "10-15";
+  if (n < 20) return "15-20";
+  if (n < 25) return "20-25";
+  return "25-30";
 }
 function displayImg(p) {
   if (!p || !p.images || !p.images.length) return "";
@@ -2505,11 +2526,11 @@ function buildFilterUI() {
   }
   if (weightBox) {
     weightBox.innerHTML = "";
-    [5, 10, 15, 20, 25, 30].forEach(weight => {
+    ALL_WEIGHTS.forEach(weight => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "size-btn" + (activeFilter.weights.indexOf(weight) >= 0 ? " selected" : "");
-      b.textContent = weight + " غ";
+      b.textContent = weight.replace("-", "–") + " غ";
       b.onclick = () => {
         activeFilter.showAll = false;
         const i = activeFilter.weights.indexOf(weight);
