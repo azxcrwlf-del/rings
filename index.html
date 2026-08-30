@@ -1814,6 +1814,21 @@ img {
 .filter-card .filter-toggle{background:#f7f9fa !important;color:#0a1620 !important;border-color:#b8c3c9 !important}
 .filter-card .filter-toggle.open{background:#02323d !important;color:#ffffff !important;border-color:#02323d !important}
 </style>
+<style>
+/* Compact mobile welcome screen: everything stays within one viewport. */
+@media (max-width: 600px) {
+  #landing { min-height:100svh; height:100svh; box-sizing:border-box; padding:12px 14px; }
+  #landing .landing-inner { width:100%; box-sizing:border-box; max-height:calc(100svh - 24px); padding:4px 8px; }
+  #landing .landing-stars { margin-bottom:clamp(4px,1.5vh,10px); }
+  #landing .landing-eyebrow { margin-bottom:clamp(6px,1.6vh,12px); }
+  #landing .landing-logo { width:min(210px,52vw) !important; max-height:35svh; object-fit:contain; margin-bottom:4px; }
+  #landing .landing-tag { margin-top:clamp(7px,1.5vh,14px); font-size:clamp(13px,3.8vw,16px); line-height:1.45; }
+  #landing .landing-tag .en { margin-top:3px; font-size:11px; }
+  #landing .landing-divider { height:clamp(16px,3vh,26px); margin-top:clamp(10px,2vh,16px); }
+  #landing .enter { padding:12px 24px; font-size:14px; }
+  #landing .landing-badge { margin-top:clamp(10px,2vh,18px); font-size:11px; }
+}
+</style>
 </head>
 <body>
 
@@ -1904,7 +1919,7 @@ img {
         <h2>تواصل معنا</h2>
         <p>للاستفسار عن الأحجار أو المقاسات أو الطلبات الخاصة</p>
         <span class="en">Questions about stones, sizing or custom orders</span>
-        <div><a class="wa" href="https://wa.me/213699069436" target="_blank" rel="noopener">واتساب</a></div>
+        <div><a class="wa" href="https://wa.me/213557043712" target="_blank" rel="noopener">واتساب · 0557043712</a></div>
       </div>
     </div>
   </section>
@@ -1937,7 +1952,7 @@ img {
       <div>
         <h2>تواصل معنا</h2>
         <p>للاستفسار أو الطلب عبر واتساب</p>
-        <a class="wa" href="https://wa.me/213699069436" target="_blank" rel="noopener">واتساب</a>
+        <a class="wa" href="https://wa.me/213557043712" target="_blank" rel="noopener">واتساب · 0557043712</a>
       </div>
       <div>
         <h2>الموقع</h2>
@@ -2236,6 +2251,7 @@ const defaultProducts = [{"cat": "", "name": "خاتم فضة نسائي رقي�
 let categories = [];
 let products = [];
 let selected = null;
+let landingAdvanceTimer = null;
 let editorImages = [];
 let editorVideos = [];
 let editorSizes = [];
@@ -2419,6 +2435,21 @@ function hideAll() {
   if (admin) { admin.classList.remove("active"); admin.style.display = "none"; }
   stopParticles();
 }
+function cancelLandingAdvance() {
+  if (landingAdvanceTimer) {
+    clearTimeout(landingAdvanceTimer);
+    landingAdvanceTimer = null;
+  }
+}
+function scheduleLandingAdvance() {
+  cancelLandingAdvance();
+  if (location.hash && location.hash !== "#") return;
+  landingAdvanceTimer = setTimeout(() => {
+    landingAdvanceTimer = null;
+    const landing = $("landing");
+    if (landing && !landing.classList.contains("hidden")) goFilter();
+  }, 2000);
+}
 function goHome() {
   hideAll();
   const landing = $("landing");
@@ -2429,9 +2460,11 @@ function goHome() {
   }
   if (location.hash && location.hash !== "") history.replaceState(null, "", location.pathname + location.search);
   window.scrollTo(0, 0);
+  scheduleLandingAdvance();
 }
 function goFilter(e) {
   if (e) e.preventDefault();
+  cancelLandingAdvance();
   hideAll();
   const filter = $("filterPage");
   if (filter) {
@@ -2443,6 +2476,7 @@ function goFilter(e) {
   window.scrollTo(0, 0);
 }
 function goResults() {
+  cancelLandingAdvance();
   hideAll();
   const results = $("resultsPage");
   if (results) {
