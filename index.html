@@ -1859,6 +1859,14 @@ img {
   .filter-groups-grid { gap:7px !important; }
 }
 </style>
+<style>
+/* Clean, predictable social button order and spacing */
+.info .social-row { display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px !important; width:min(100%,520px); }
+.info .social-row .social-logo { width:100%; box-sizing:border-box; margin-top:0 !important; justify-content:center; }
+@media (max-width:600px) {
+  .info .social-row { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px !important; }
+}
+</style>
 </head>
 <body>
 
@@ -1909,7 +1917,7 @@ img {
         </details>
         <details class="filter-group filter-accordion" id="filterWeightGroup">
           <summary class="group-label">الوزن <span class="en">Weight</span></summary>
-          <p class="hint">اختر نطاق الوزن: من 0 إلى 5 غ، ثم كل 5 غ حتى 30 غ.</p>
+          <p class="hint">اختر نطاق الوزن: كل 10 غ حتى 30 غ، أو أكثر من 30 غ.</p>
           <div class="weight-grid" id="filterWeights"></div>
         </details>
         <details class="filter-group filter-accordion" id="filterBudgetGroup">
@@ -1940,9 +1948,6 @@ img {
         <p>للاستفسار عن الأحجار أو المقاسات أو الطلبات الخاصة</p>
         <span class="en">Questions about stones, sizing or custom orders</span>
         <div><div class="social-row">
-          <a class="wa social-logo" href="https://wa.me/213557043712" target="_blank" rel="noopener" aria-label="واتساب 0557043712">
-            <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.85 11.85 0 0 0 12.07 0C5.53 0 .2 5.32.2 11.86c0 2.09.55 4.13 1.6 5.93L.1 24l6.36-1.67a11.86 11.86 0 0 0 5.61 1.42h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.24-6.14-3.44-8.39ZM12.08 21.7h-.01a9.84 9.84 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 1 1 8.38 4.64Zm5.4-7.36c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.76-1.66-2.06-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.09 4.49.71.31 1.27.5 1.7.64.72.23 1.38.2 1.9.12.58-.09 1.76-.72 2-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35Z"/></svg><span>واتساب</span>
-          </a>
           <a class="social-btn social-logo instagram" href="https://www.instagram.com/khatem_ali_?igsi=NHNsbWZub2VsMXM4" target="_blank" rel="noopener" aria-label="إنستغرام">
             <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.1" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.35" cy="6.7" r="1.15" fill="currentColor"/></svg><span>إنستغرام</span>
           </a>
@@ -1951,6 +1956,9 @@ img {
           </a>
           <a class="social-btn social-logo tiktok" href="https://www.tiktok.com/@user7111749730573?_r=1&amp;_t=ZS-99IkeX5S9RK" target="_blank" rel="noopener" aria-label="تيك توك">
             <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 3c.35 1.95 1.43 3.13 3.5 3.25v3.02c-1.2.12-2.3-.28-3.47-1.04v6.07c0 3.98-2.22 6.7-5.53 6.7-3.07 0-5.5-2.14-5.5-5.14 0-3.2 2.7-5.58 5.92-5.18v3.1c-1.72-.3-2.79.7-2.79 1.94 0 1.12.9 2.02 2.1 2.02 1.3 0 2.1-.96 2.1-2.6V3h3.67Z"/></svg><span>تيك توك</span>
+          </a>
+          <a class="wa social-logo" href="https://wa.me/213557043712" target="_blank" rel="noopener" aria-label="واتساب 0557043712">
+            <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.85 11.85 0 0 0 12.07 0C5.53 0 .2 5.32.2 11.86c0 2.09.55 4.13 1.6 5.93L.1 24l6.36-1.67a11.86 11.86 0 0 0 5.61 1.42h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.24-6.14-3.44-8.39ZM12.08 21.7h-.01a9.84 9.84 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 1 1 8.38 4.64Zm5.4-7.36c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.76-1.66-2.06-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.09 4.49.71.31 1.27.5 1.7.64.72.23 1.38.2 1.9.12.58-.09 1.76-.72 2-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35Z"/></svg><span>واتساب</span>
           </a>
         </div></div>
       </div>
@@ -1986,9 +1994,6 @@ img {
         <h2>تواصل معنا</h2>
         <p>للاستفسار أو الطلب عبر واتساب</p>
         <div class="social-row">
-          <a class="wa social-logo" href="https://wa.me/213557043712" target="_blank" rel="noopener" aria-label="واتساب 0557043712">
-            <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.85 11.85 0 0 0 12.07 0C5.53 0 .2 5.32.2 11.86c0 2.09.55 4.13 1.6 5.93L.1 24l6.36-1.67a11.86 11.86 0 0 0 5.61 1.42h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.24-6.14-3.44-8.39ZM12.08 21.7h-.01a9.84 9.84 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 1 1 8.38 4.64Zm5.4-7.36c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.76-1.66-2.06-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.09 4.49.71.31 1.27.5 1.7.64.72.23 1.38.2 1.9.12.58-.09 1.76-.72 2-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35Z"/></svg><span>واتساب</span>
-          </a>
           <a class="social-btn social-logo instagram" href="https://www.instagram.com/khatem_ali_?igsi=NHNsbWZub2VsMXM4" target="_blank" rel="noopener" aria-label="إنستغرام">
             <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.1" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.35" cy="6.7" r="1.15" fill="currentColor"/></svg><span>إنستغرام</span>
           </a>
@@ -1997,6 +2002,9 @@ img {
           </a>
           <a class="social-btn social-logo tiktok" href="https://www.tiktok.com/@user7111749730573?_r=1&amp;_t=ZS-99IkeX5S9RK" target="_blank" rel="noopener" aria-label="تيك توك">
             <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 3c.35 1.95 1.43 3.13 3.5 3.25v3.02c-1.2.12-2.3-.28-3.47-1.04v6.07c0 3.98-2.22 6.7-5.53 6.7-3.07 0-5.5-2.14-5.5-5.14 0-3.2 2.7-5.58 5.92-5.18v3.1c-1.72-.3-2.79.7-2.79 1.94 0 1.12.9 2.02 2.1 2.02 1.3 0 2.1-.96 2.1-2.6V3h3.67Z"/></svg><span>تيك توك</span>
+          </a>
+          <a class="wa social-logo" href="https://wa.me/213557043712" target="_blank" rel="noopener" aria-label="واتساب 0557043712">
+            <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.85 11.85 0 0 0 12.07 0C5.53 0 .2 5.32.2 11.86c0 2.09.55 4.13 1.6 5.93L.1 24l6.36-1.67a11.86 11.86 0 0 0 5.61 1.42h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.24-6.14-3.44-8.39ZM12.08 21.7h-.01a9.84 9.84 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.83 9.83 0 1 1 8.38 4.64Zm5.4-7.36c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.76-1.66-2.06-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.09 4.49.71.31 1.27.5 1.7.64.72.23 1.38.2 1.9.12.58-.09 1.76-.72 2-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35Z"/></svg><span>واتساب</span>
           </a>
         </div>
       </div>
@@ -2194,12 +2202,10 @@ img {
             <label>الوزن (غرام)</label>
             <select id="ap-weight">
               <option value="">— بدون وزن —</option>
-              <option value="0-5">0–5 غ</option>
-              <option value="5-10">5–10 غ</option>
-              <option value="10-15">10–15 غ</option>
-              <option value="15-20">15–20 غ</option>
-              <option value="20-25">20–25 غ</option>
-              <option value="25-30">25–30 غ</option>
+              <option value="0-10">0–10 غ</option>
+              <option value="10-20">10–20 غ</option>
+              <option value="20-30">20–30 غ</option>
+              <option value="above30">أكثر من 30 غ</option>
             </select>
           </div>
           <div>
@@ -2288,7 +2294,7 @@ const IDB_NAME = "khatemAliDB";
 const IDB_STORE = "kv";
 const IDB_KEY = "appdata";
 const ALL_SIZES = ["51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76"];
-const ALL_WEIGHTS = ["0-5", "5-10", "10-15", "15-20", "20-25", "25-30"];
+const ALL_WEIGHTS = ["0-10", "10-20", "20-30", "above30"];
 const WA_NUMBER = "213699069436";
 
 const defaultCategories = [];
@@ -2327,14 +2333,15 @@ function normalizeProduct(p) {
 function normalizeWeight(value) {
   const raw = String(value == null ? "" : value).trim().replace(/[–—]/g, "-");
   if (ALL_WEIGHTS.indexOf(raw) >= 0) return raw;
+  const legacy = { "0-5": "0-10", "5-10": "0-10", "10-15": "10-20", "15-20": "10-20", "20-25": "20-30", "25-30": "20-30" };
+  if (legacy[raw]) return legacy[raw];
+  if (raw === "30+" || raw === "30-plus" || raw === "above-30") return "above30";
   const n = Number(raw);
-  if (!Number.isFinite(n) || n < 0 || n > 30) return "";
-  if (n < 5) return "0-5";
-  if (n < 10) return "5-10";
-  if (n < 15) return "10-15";
-  if (n < 20) return "15-20";
-  if (n < 25) return "20-25";
-  return "25-30";
+  if (!Number.isFinite(n) || n < 0) return "";
+  if (n < 10) return "0-10";
+  if (n < 20) return "10-20";
+  if (n <= 30) return "20-30";
+  return "above30";
 }
 function displayImg(p) {
   if (!p || !p.images || !p.images.length) return "";
@@ -2494,7 +2501,7 @@ function scheduleLandingAdvance() {
     landingAdvanceTimer = null;
     const landing = $("landing");
     if (landing && !landing.classList.contains("hidden")) goFilter();
-  }, 2000);
+  }, 1000);
 }
 function goHome() {
   hideAll();
@@ -2611,7 +2618,7 @@ function buildFilterUI() {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "size-btn" + (activeFilter.weights.indexOf(weight) >= 0 ? " selected" : "");
-      b.textContent = weight.replace("-", "–") + " غ";
+      b.textContent = weight === "above30" ? "أكثر من 30 غ" : weight.replace("-", "–") + " غ";
       b.onclick = () => {
         activeFilter.showAll = false;
         const i = activeFilter.weights.indexOf(weight);
@@ -2743,7 +2750,7 @@ function appendResultBatch() {
     const src = thumbUrl(p);
     const sizeNames = (p.sizes || []).filter(s => s.stock).map(s => s.name).join(" · ");
     const oos = p.inStock ? "" : '<span class="badge-oos">غير متوفر</span>';
-    const meta = [p.weight ? p.weight + " غ" : "", p.gender && p.gender !== "all" ? genderLabel(p.gender) : ""].filter(Boolean).join(" · ");
+    const meta = [p.weight ? (p.weight === "above30" ? "أكثر من 30 غ" : p.weight.replace("-", "–") + " غ") : "", p.gender && p.gender !== "all" ? genderLabel(p.gender) : ""].filter(Boolean).join(" · ");
 
     let imgHtml;
     if (src) {
