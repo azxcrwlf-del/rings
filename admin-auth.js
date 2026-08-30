@@ -5,7 +5,7 @@
 
 class AdminAuth {
   constructor() {
-    this.ADMIN_PASSWORD = 'admin123'; // CHANGE THIS TO YOUR PASSWORD
+    this.ADMIN_PASSWORD = 'ALI2026'; // PASSWORD SET
     this.AUTH_KEY = 'adminAuth';
     this.SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
     this.init();
