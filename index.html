@@ -443,6 +443,13 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 .admin-media-item .media-kind{font-size:11px;color:var(--gold);font-weight:700;white-space:nowrap}
 .admin-media-item .media-url{direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:12px;color:var(--muted)}
 .admin-media-item .rm{width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:14px;line-height:24px;text-align:center;cursor:pointer;border:0;flex:0 0 auto}
+.media-upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.media-upload-button{display:inline-flex;align-items:center;justify-content:center;min-height:43px;padding:10px 15px;border:1px solid var(--gold);border-radius:8px;background:rgba(201,182,114,.12);color:var(--teal);font-weight:700;cursor:pointer}
+.media-upload-button:hover{background:var(--gold-light)}
+.media-upload-button.disabled{opacity:.55;pointer-events:none}
+.media-upload-status{font-size:12px;color:var(--muted);min-height:18px}
+.media-upload-status.ok{color:var(--teal)}
+.media-upload-status.error{color:#a00}
 .product-videos{padding:0 22px 22px}
 .product-videos-title{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:10px}
 .product-videos-list{display:grid;gap:12px}
@@ -2215,22 +2222,24 @@ img {
           <input id="ap-name" placeholder="مثال: خاتم عقيق يمني" required>
         </div>
         <div>
-          <label>الصور</label>
+          <label>الصور والفيديوهات من الهاتف</label>
           <div class="admin-imgs" id="ap-imgs"></div>
+          <div class="admin-media-list" id="ap-videos"></div>
+          <div class="media-upload-row">
+            <label class="media-upload-button" for="ap-media-files">اختيار من معرض الهاتف</label>
+            <input type="file" id="ap-media-files" accept="image/*,video/*" multiple style="display:none">
+            <span class="media-upload-status" id="mediaUploadStatus">اختر صوراً أو فيديوهات، وسيتم رفعها مباشرة.</span>
+          </div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
             <input type="url" id="ap-img-url" placeholder="https://.../image.jpg" inputmode="url" autocomplete="off" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;direction:ltr;text-align:left">
             <button type="button" class="admin-btn secondary" id="ap-img-add">إضافة رابط</button>
           </div>
-          <p class="admin-note">الصق رابط الصورة من خدمة التخزين (https://...). الصورة الأولى تظهر في القائمة. لا تُضمّن الصور داخل JSON.</p>
-        </div>
-          <div>
-          <label>الفيديوهات</label>
-          <div class="admin-media-list" id="ap-videos"></div>
+          <p class="admin-note">الرفع من الهاتف يحفظ رابط الملف فقط داخل بيانات المنتج؛ لا يتم حفظ الصور أو الفيديوهات داخل JSON. يمكن إضافة رابط خارجي عند الحاجة.</p>
           <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
             <input type="url" id="ap-video-url" placeholder="https://youtube.com/... أو https://.../video.mp4" inputmode="url" autocomplete="off" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;direction:ltr;text-align:left">
             <button type="button" class="admin-btn secondary" id="ap-video-add">إضافة رابط</button>
           </div>
-          <p class="admin-note">أضف رابط YouTube أو Vimeo أو ملف فيديو مباشر (MP4/WebM). سيظهر الفيديو داخل صفحة المنتج.</p>
+          <p class="admin-note">أضف رابط YouTube أو Vimeo أو ملف فيديو مباشر (MP4/WebM) عند الحاجة.</p>
         </div>
         <div>
           <label><input type="checkbox" id="ap-instock" checked> متوفر</label>
@@ -2283,6 +2292,10 @@ img {
 
 const CATALOG_API = "https://khatem-ali-catalog.azxcrwlf.workers.dev";
 const AUTH_KEY = "khatemali_admin_auth";
+const R2_UPLOAD_API = "https://khatem-ali-media.azxcrwlf.workers.dev";
+const R2_UPLOAD_READY = false;
+const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 const IDB_NAME = "khatemAliDB";
 const IDB_STORE = "kv";
 const IDB_KEY = "appdata";
@@ -3173,6 +3186,8 @@ function renderAdminList() {
     row.querySelector("[data-edit]").onclick = () => editProduct(idx);
     row.querySelector("[data-del]").onclick = async () => {
       if (!confirm("حذف «" + p.name + "»؟")) return;
+      const mediaUrls = (p.images || []).concat(p.videos || []).filter(mediaUrlIsManaged);
+      if (!(await deleteManagedMedia(mediaUrls, false))) return;
       products.splice(idx, 1);
       await saveDraft();
       renderAdminList();
@@ -3198,6 +3213,82 @@ function resetEditor() {
   renderEditorVideos();
   renderEditorSizes();
 }
+
+function getSessionAdminToken() {
+  try { return sessionStorage.getItem(AUTH_KEY) || ""; } catch (e) { return ""; }
+}
+function setMediaUploadStatus(message, state) {
+  const el = $("mediaUploadStatus");
+  if (!el) return;
+  el.textContent = message;
+  el.className = "media-upload-status" + (state ? " " + state : "");
+}
+function mediaUrlIsManaged(url) {
+  return typeof url === "string" && url.indexOf(R2_UPLOAD_API + "/media/") === 0;
+}
+async function deleteManagedMedia(urls, ask) {
+  const managed = Array.from(new Set((urls || []).filter(mediaUrlIsManaged)));
+  if (ask && !confirm(managed.length ? "حذف هذا الملف من التخزين؟" : "إزالة هذا الرابط من المنتج؟")) return false;
+  if (!managed.length) return true;
+  if (!R2_UPLOAD_READY) { alert("رفع Cloudflare R2 لم يُفعّل بعد. لم يتم حذف الملف."); return false; }
+  const token = getSessionAdminToken();
+  if (!token) { alert("انتهت جلسة الإدارة. سجّل الدخول مرة أخرى."); return false; }
+  try {
+    const r = await fetch(R2_UPLOAD_API + "/delete", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ urls: managed }) });
+    if (!r.ok) throw new Error("delete failed");
+    return true;
+  } catch (e) {
+    alert("تعذّر حذف الملف من R2. لم يتم تغييره من المنتج.");
+    return false;
+  }
+}
+async function removeEditorMedia(kind, src, index) {
+  if (!(await deleteManagedMedia([src], true))) return;
+  if (kind === "image") editorImages.splice(index, 1);
+  else editorVideos.splice(index, 1);
+  renderEditorImages();
+  renderEditorVideos();
+}
+async function uploadEditorMedia(fileList) {
+  const files = Array.from(fileList || []);
+  const input = $("ap-media-files");
+  if (input) input.value = "";
+  if (!files.length) return;
+  if (!R2_UPLOAD_READY) {
+    setMediaUploadStatus("سيعمل الرفع بعد تفعيل Cloudflare R2.", "error");
+    alert("Cloudflare R2 لم يُفعّل بعد. زر الرفع جاهز، وسيعمل مباشرة بعد إكمال تفعيل R2.");
+    return;
+  }
+  const token = getSessionAdminToken();
+  if (!token) { alert("سجّل الدخول إلى لوحة الإدارة أولاً."); return; }
+  const valid = files.filter(file => {
+    const isImage = file.type.indexOf("image/") === 0;
+    const isVideo = file.type.indexOf("video/") === 0;
+    const max = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+    if ((!isImage && !isVideo) || file.size > max) { alert("الملف غير صالح أو كبير جداً: " + file.name); return false; }
+    return true;
+  });
+  let uploaded = 0;
+  for (const file of valid) {
+    setMediaUploadStatus("جاري رفع " + (uploaded + 1) + " من " + valid.length + "…");
+    try {
+      const form = new FormData();
+      form.append("file", file, file.name);
+      const r = await fetch(R2_UPLOAD_API + "/upload", { method: "POST", headers: { "Authorization": "Bearer " + token }, body: form });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok || !data.url) throw new Error(data.error || "upload failed");
+      if (file.type.indexOf("video/") === 0) editorVideos.push(data.url);
+      else editorImages.push(data.url);
+      uploaded++;
+      renderEditorImages();
+      renderEditorVideos();
+    } catch (e) {
+      setMediaUploadStatus("فشل رفع " + file.name, "error");
+      alert("تعذّر رفع " + file.name + ". حاول مرة أخرى.");
+    }
+  }
+  if (uploaded) setMediaUploadStatus("تم رفع " + uploaded + " ملف. احفظ المنتج ثم انشر التغييرات.", "ok");
+}
 function renderEditorImages() {
   const box = $("ap-imgs");
   box.innerHTML = "";
@@ -3205,10 +3296,7 @@ function renderEditorImages() {
     const d = document.createElement("div");
     d.className = "admin-img-item";
     d.innerHTML = '<img src="' + src + '" alt=""><button type="button" class="rm">×</button>';
-    d.querySelector(".rm").onclick = () => {
-      editorImages.splice(i, 1);
-      renderEditorImages();
-    };
+    d.querySelector(".rm").onclick = () => removeEditorMedia("image", src, i);
     box.appendChild(d);
   });
   const add = document.createElement("div");
@@ -3235,7 +3323,7 @@ function renderEditorVideos() {
     remove.className = "rm";
     remove.textContent = "×";
     remove.setAttribute("aria-label", "حذف الفيديو");
-    remove.onclick = () => { editorVideos.splice(i, 1); renderEditorVideos(); };
+    remove.onclick = () => removeEditorMedia("video", src, i);
     row.append(kind, label, remove);
     box.appendChild(row);
   });
@@ -3527,10 +3615,12 @@ function bindUI() {
   const aadd = $("ap-img-add");
   const vurl = $("ap-video-url");
   const vadd = $("ap-video-add");
+  const mediaFiles = $("ap-media-files");
   if (aadd) aadd.addEventListener("click", addImageUrl);
   if (aurl) aurl.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addImageUrl(); } });
   if (vadd) vadd.addEventListener("click", addVideoUrl);
   if (vurl) vurl.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addVideoUrl(); } });
+  if (mediaFiles) mediaFiles.addEventListener("change", e => uploadEditorMedia(e.target.files));
 
   const pub = $("btnPublish");
   if (pub) pub.addEventListener("click", publishSite);
