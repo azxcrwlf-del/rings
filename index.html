@@ -2100,14 +2100,11 @@ img {
     </div>
 
     <div class="admin-card">
-      <h2>نشر على GitHub Pages</h2>
+      <h2>نشر المنتجات مباشرة</h2>
       <p class="admin-note">
-        التعديلات هنا محلية على هذا الجهاز فقط. ليراها الزوار:<br>
-        1) اضغط الزر لتحميل <strong>products.json</strong><br>
-        2) ارفعه في جذر المستودع بجانب index.html على GitHub<br>
-        3) Commit + Push — بعد دقيقة أو دقيقتين يظهر للجميع
+        عدّل المنتجات من هذه اللوحة، ثم اضغط الزر. ستظهر التغييرات للزوار مباشرة بدون تحميل ملف أو Commit أو Push.
       </p>
-      <button type="button" class="admin-btn" id="btnPublish">نشر — تحميل products.json</button>
+      <button type="button" class="admin-btn" id="btnPublish">نشر المنتجات الآن</button>
       <div id="publishStatus"></div>
       <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="admin-btn secondary" id="btnExport">تصدير JSON</button>
@@ -2128,7 +2125,7 @@ img {
    Admin edits stay local (IndexedDB) until you publish.
    ========================================================= */
 
-const ADMIN_PASS = "khatem2026";
+const CATALOG_API = "https://khatem-ali-catalog.azxcrwlf.workers.dev";
 const AUTH_KEY = "khatemali_admin_auth";
 const IDB_NAME = "khatemAliDB";
 const IDB_STORE = "kv";
@@ -2271,11 +2268,10 @@ async function fetchPublished() {
     const base = location.href.split("#")[0].split("?")[0];
     let dir = base.replace(/\/[^\/]*$/, "/");
     if (dir.indexOf("http") !== 0) dir = "/";
-    const urls = [dir + "products.json", "products.json"];
-    // Use browser cache when possible (faster on phone / return visits)
+    const urls = [CATALOG_API + "/catalog", dir + "products.json", "products.json"];
     for (let i = 0; i < urls.length; i++) {
       try {
-        const r = await fetch(urls[i], { cache: "default", credentials: "same-origin" });
+        const r = await fetch(urls[i], { cache: "no-store", credentials: i === 0 ? "omit" : "same-origin" });
         if (!r.ok) continue;
         const data = await r.json();
         if (applyRemote(data)) {
@@ -2665,7 +2661,7 @@ function sendOrder(e) {
 
 /* ---------- admin ---------- */
 function isAdminAuthed() {
-  try { return sessionStorage.getItem(AUTH_KEY) === "1"; } catch (e) { return false; }
+  try { return Boolean(sessionStorage.getItem(AUTH_KEY)); } catch (e) { return false; }
 }
 function openAdmin() {
   if (isAdminAuthed()) enterAdmin();
@@ -2680,12 +2676,23 @@ function closeGate() {
   $("admin-gate").classList.remove("show");
   if (location.hash === "#admin") goFilter();
 }
-function tryAdminLogin() {
-  if ($("gatePass").value === ADMIN_PASS) {
-    try { sessionStorage.setItem(AUTH_KEY, "1"); } catch (e) {}
+async function tryAdminLogin() {
+  const password = $("gatePass").value;
+  const button = $("btnAdminLogin");
+  if (!password || (button && button.dataset.authenticating === "1")) return;
+  if (button) { button.dataset.authenticating = "1"; button.disabled = true; }
+  $("gateError").style.display = "none";
+  try {
+    const r = await fetch(CATALOG_API + "/auth", { method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store", body: JSON.stringify({ password: password }) });
+    if (!r.ok) throw new Error("invalid");
+    const data = await r.json();
+    if (!data.token) throw new Error("invalid");
+    try { sessionStorage.setItem(AUTH_KEY, data.token); } catch (e) {}
     enterAdmin();
-  } else {
+  } catch (e) {
     $("gateError").style.display = "block";
+  } finally {
+    if (button) { button.dataset.authenticating = "0"; button.disabled = false; }
   }
 }
 async function enterAdmin() {
@@ -2928,26 +2935,32 @@ function saveProduct(e) {
   resetEditor();
   renderAdminList();
 }
-function publishSite() {
+async function publishSite() {
+  const btn = $("btnPublish");
+  if (btn && btn.dataset.publishing === "1") return;
+  const token = (() => { try { return sessionStorage.getItem(AUTH_KEY) || ""; } catch (e) { return ""; } })();
+  if (!token) { alert("انتهت جلسة الإدارة. افتح لوحة الإدارة وسجّل الدخول مرة أخرى."); return; }
   saveDraft();
-  const payload = {
-    categories: categories.slice(),
-    products: products.map(normalizeProduct),
-    updatedAt: new Date().toISOString()
-  };
-  const jsonStr = JSON.stringify(payload, null, 2);
-  const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8" });
-  downloadBlob(blob, "products.json");
-  const mb = (jsonStr.length / 1024 / 1024).toFixed(2);
-  setPublishStatus("تم تحميل products.json (" + products.length + " منتج · ~" + mb + " ميجا)");
-  alert(
-    "تم تحميل products.json\n\n" +
-    products.length + " منتج.\n\n" +
-    "ارفع الملف على GitHub:\n" +
-    "1) ضعه في جذر المستودع بجانب index.html\n" +
-    "2) Commit ثم Push\n" +
-    "3) بعد دقيقة افتح الموقع في نافذة خاصة للتأكد"
-  );
+  const payload = { categories: categories.slice(), products: products.map(normalizeProduct), updatedAt: new Date().toISOString() };
+  if (btn) { btn.dataset.publishing = "1"; btn.disabled = true; btn.textContent = "جاري النشر…"; }
+  setPublishStatus("جاري نشر المنتجات مباشرة… (" + products.length + " منتج)");
+  try {
+    const r = await fetch(CATALOG_API + "/catalog", { method: "PUT", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, cache: "no-store", body: JSON.stringify(payload) });
+    if (!r.ok) {
+      if (r.status === 401) { try { sessionStorage.removeItem(AUTH_KEY); } catch (e) {} throw new Error("انتهت جلسة الإدارة، سجّل الدخول مرة أخرى"); }
+      throw new Error("فشل النشر (" + r.status + ")");
+    }
+    setPublishStatus("✅ تم نشر المنتجات مباشرة — " + products.length + " منتج");
+    if (btn) btn.textContent = "✅ تم النشر مباشرة";
+    alert("✅ تم نشر المنتجات مباشرة\n\n" + products.length + " منتج متاح الآن للزوار.");
+  } catch (err) {
+    const msg = (err && err.message) ? err.message : "فشل النشر";
+    setPublishStatus("❌ " + msg);
+    if (btn) btn.textContent = "نشر المنتجات الآن";
+    alert("❌ " + msg);
+  } finally {
+    if (btn) { btn.dataset.publishing = "0"; btn.disabled = false; }
+  }
 }
 function exportProducts() {
   const payload = {
