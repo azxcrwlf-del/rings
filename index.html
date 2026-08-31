@@ -473,7 +473,38 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 .budget-btn:hover{border-color:var(--gold);transform:translateY(-1px)}
 .budget-btn.selected{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 6px 14px rgba(10,42,36,.25)}
 .product-meta{font-size:12px;color:var(--muted);margin-top:5px}
+/* Product specs table */
+.product-specs{
+  margin:0 0 20px;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  background:linear-gradient(180deg,#fff 0%,#fafbfc 100%);
+  box-shadow:var(--shadow-sm);
+}
+.product-specs-title{
+  font-size:12px;font-weight:600;color:var(--gold);letter-spacing:.04em;
+  padding:12px 16px 8px;border-bottom:1px solid rgba(201,182,114,.25);
+  background:rgba(201,182,114,.06);
+}
+.product-specs table{width:100%;border-collapse:collapse;font-size:13px}
+.product-specs tr{border-bottom:1px solid var(--line)}
+.product-specs tr:last-child{border-bottom:0}
+.product-specs th,.product-specs td{padding:11px 16px;text-align:right;vertical-align:middle}
+.product-specs th{
+  width:38%;font-weight:600;color:var(--teal);background:rgba(2,50,61,.03);
+  border-left:1px solid var(--line);white-space:nowrap;
+}
+.product-specs td{color:var(--ink);font-weight:500}
+.product-specs tr:hover td{background:rgba(201,182,114,.04)}
+.admin-specs-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px;
+}
+.admin-specs-grid label{display:block;font-size:12px;color:var(--muted)}
+.admin-specs-grid input,.admin-specs-grid select{
+  width:100%;margin-top:5px;border:1px solid var(--line);background:#fff;padding:11px;outline:0;border-radius:4px;font-family:inherit;
+}
+.admin-specs-grid input:focus,.admin-specs-grid select:focus{border-color:var(--gold)}
+@media(max-width:520px){.admin-specs-grid{grid-template-columns:1fr}}
 @media(max-width:700px){.filter-groups-grid{grid-template-columns:1fr}.budget-fields{grid-template-columns:1fr 1fr}}
+
 .size-btn{min-width:48px;padding:10px 14px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:.2s;border-radius:999px}
 .size-btn:hover{border-color:var(--gold);transform:translateY(-1px)}
 .size-btn.selected{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 6px 14px rgba(10,42,36,.25)}
@@ -489,8 +520,9 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 /* Admin */
 #admin{display:none;min-height:100svh;background:transparent}
 #admin.active{display:block}
-#admin-gate{display:none;position:fixed;inset:0;z-index:60;background:rgba(6,24,21,.75);align-items:center;justify-content:center;padding:20px}
-#admin-gate.show{display:flex}
+#admin-gate{display:none !important;position:fixed;inset:0;z-index:60;background:rgba(6,24,21,.75);align-items:center;justify-content:center;padding:20px;pointer-events:none}
+#admin-gate.show{display:flex !important;pointer-events:auto}
+
 .gate-box{background:var(--bg);max-width:360px;width:100%;padding:28px;border-radius:6px}
 .gate-box h2{font-size:20px;margin-bottom:8px;color:var(--teal)}
 .gate-box p{font-size:13px;color:var(--muted);margin-bottom:16px}
@@ -632,10 +664,12 @@ html, body {
   box-sizing: border-box;
 }
 #admin-gate.show {
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
 }
+
 .gate-box {
   margin: auto;
 }
@@ -2166,10 +2200,17 @@ img {
       <div class="product-videos-list" id="productVideosList"></div>
     </div>
     <div class="detail-body">
+      <div class="product-specs" id="productSpecs" style="display:none">
+        <div class="product-specs-title">مواصفات المنتج</div>
+        <table>
+          <tbody id="productSpecsBody"></tbody>
+        </table>
+      </div>
       <div class="option-block" id="sizeBlock">
         <span class="option-label">المقاس</span>
         <div class="sizes" id="sizeOptions"></div>
       </div>
+
       <form class="form" id="orderForm">
         <div>
           <label>الاسم</label>
@@ -2342,7 +2383,26 @@ img {
           <input id="ap-name" placeholder="مثال: خاتم عقيق يمني" required>
         </div>
         <div>
+          <label>جدول المواصفات <span class="en" style="opacity:.7">Product specs</span></label>
+          <p class="admin-note" style="margin-bottom:8px">تظهر هذه المعلومات في بطاقة المنتج للزائر بالترتيب التالي: نوع الحجر ← الوزن ← عيار الفضة ← الصياغة.</p>
+          <div class="admin-specs-grid">
+            <label>نوع الحجر
+              <input id="ap-stone" placeholder="مثال: عقيق يمني" maxlength="80">
+            </label>
+            <label>الوزن
+              <input id="ap-weight-detail" placeholder="مثال: 12.5 غ" maxlength="40">
+            </label>
+            <label>عيار الفضة
+              <input id="ap-silver" placeholder="مثال: 925" maxlength="40">
+            </label>
+            <label>الصياغة
+              <input id="ap-craft" placeholder="مثال: يدوية / مسبوكة" maxlength="80">
+            </label>
+          </div>
+        </div>
+        <div>
           <label>الصور والفيديوهات من الهاتف</label>
+
           <div class="admin-imgs" id="ap-imgs"></div>
           <div class="admin-media-list" id="ap-videos"></div>
           <div class="media-upload-row">
@@ -2464,6 +2524,10 @@ function normalizeProduct(p) {
     price: (p.price || "").trim(),
     weight: normalizeWeight(p.weight),
     gender: ["men", "women"].indexOf(p.gender) >= 0 ? p.gender : "all",
+    stone: String(p.stone || "").trim(),
+    weightDetail: String(p.weightDetail || "").trim(),
+    silver: String(p.silver || "").trim(),
+    craft: String(p.craft || "").trim(),
     images: Array.isArray(p.images) ? p.images.filter(Boolean) : [],
     videos: Array.isArray(p.videos) ? p.videos.map(v => String(v || "").trim()).filter(Boolean) : [],
     inStock: p.inStock !== false,
@@ -2472,6 +2536,7 @@ function normalizeProduct(p) {
       : []
   };
 }
+
 function normalizeWeight(value) {
   const raw = String(value == null ? "" : value).trim().replace(/[–—]/g, "-");
   if (ALL_WEIGHTS.indexOf(raw) >= 0) return raw;
@@ -3101,6 +3166,27 @@ function renderProductVideos(videos) {
   wrap.style.display = "";
 }
 
+function renderProductSpecs(p) {
+  const wrap = $("productSpecs");
+  const body = $("productSpecsBody");
+  if (!wrap || !body) return;
+  // Order: نوع الحجر → الوزن → عيار الفضة → الصياغة
+  const rows = [
+    { label: "نوع الحجر", value: p.stone || p.cat || "" },
+    { label: "الوزن", value: p.weightDetail || "" },
+    { label: "عيار الفضة", value: p.silver || "" },
+    { label: "الصياغة", value: p.craft || "" }
+  ].filter(r => r.value);
+  if (!rows.length) {
+    wrap.style.display = "none";
+    body.innerHTML = "";
+    return;
+  }
+  body.innerHTML = rows.map(r =>
+    "<tr><th scope=\"row\">" + escapeHtml(r.label) + "</th><td>" + escapeHtml(r.value) + "</td></tr>"
+  ).join("");
+  wrap.style.display = "";
+}
 function openProduct(p) {
   selected = normalizeProduct(p);
   galleryImages = selected.images.slice();
@@ -3114,6 +3200,7 @@ function openProduct(p) {
   $("orderNote").value = "";
   showGalleryAt(0);
   renderProductVideos(selected.videos);
+  renderProductSpecs(selected);
   const sizeBox = $("sizeOptions");
   sizeBox.innerHTML = "";
   const sizes = (selected.sizes || []).filter(s => s.stock);
@@ -3139,6 +3226,7 @@ function openProduct(p) {
   $("order").style.display = "block";
   document.body.style.overflow = "hidden";
 }
+
 function closeOrder() {
   $("order").style.display = "none";
   document.body.style.overflow = "";
@@ -3228,8 +3316,13 @@ function sendOrder(e) {
   msg += "• المنتج: " + selected.name + "\n";
   msg += "• السعر: " + selected.price + "\n";
   if (selected.size) msg += "• المقاس: " + selected.size + "\n";
-  if (selected.cat) msg += "• التصنيف: " + selected.cat + "\n";
+  if (selected.stone) msg += "• نوع الحجر: " + selected.stone + "\n";
+  else if (selected.cat) msg += "• التصنيف: " + selected.cat + "\n";
+  if (selected.weightDetail) msg += "• الوزن: " + selected.weightDetail + "\n";
+  if (selected.silver) msg += "• عيار الفضة: " + selected.silver + "\n";
+  if (selected.craft) msg += "• الصياغة: " + selected.craft + "\n";
   msg += "• الاسم: " + name + "\n";
+
   msg += "• الهاتف: " + phone + "\n";
   msg += "• الولاية: " + wilaya + "\n";
   if (baladiya) msg += "• البلدية: " + baladiya + "\n";
@@ -3242,16 +3335,30 @@ function isAdminAuthed() {
   try { return Boolean(sessionStorage.getItem(AUTH_KEY)); } catch (e) { return false; }
 }
 function openAdmin() {
-  if (isAdminAuthed()) enterAdmin();
-  else {
-    $("admin-gate").classList.add("show");
-    $("gatePass").value = "";
-    $("gateError").style.display = "none";
-    setTimeout(() => $("gatePass").focus(), 50);
+  if (isAdminAuthed()) {
+    enterAdmin();
+    return;
   }
+  showAdminGate();
+  if ($("gatePass")) $("gatePass").value = "";
+  if ($("gateError")) $("gateError").style.display = "none";
+  setTimeout(() => { const p = $("gatePass"); if (p) p.focus(); }, 50);
+}
+
+function hideAdminGate() {
+  const gate = $("admin-gate");
+  if (!gate) return;
+  gate.classList.remove("show");
+  gate.style.display = "none";
+}
+function showAdminGate() {
+  const gate = $("admin-gate");
+  if (!gate) return;
+  gate.classList.add("show");
+  gate.style.display = "flex";
 }
 function closeGate() {
-  $("admin-gate").classList.remove("show");
+  hideAdminGate();
   if (location.hash === "#admin") goFilter();
 }
 async function tryAdminLogin() {
@@ -3266,7 +3373,10 @@ async function tryAdminLogin() {
     const data = await r.json();
     if (!data.token) throw new Error("invalid");
     try { sessionStorage.setItem(AUTH_KEY, data.token); } catch (e) {}
-    enterAdmin();
+    // Hide gate immediately so it never stays floating over the panel
+    hideAdminGate();
+    if ($("gatePass")) $("gatePass").value = "";
+    await enterAdmin();
   } catch (e) {
     $("gateError").style.display = "block";
   } finally {
@@ -3274,11 +3384,13 @@ async function tryAdminLogin() {
   }
 }
 async function enterAdmin() {
-  $("admin-gate").classList.remove("show");
+  hideAdminGate();
   hideAll();
   const admin = $("admin");
-  admin.style.display = "block";
-  admin.classList.add("active");
+  if (admin) {
+    admin.style.display = "block";
+    admin.classList.add("active");
+  }
   if (location.hash !== "#admin") location.hash = "#admin";
   const had = await loadDraft();
   if (!had) {
@@ -3292,7 +3404,9 @@ async function enterAdmin() {
   renderSiteContentEditor();
   fillCatSelect();
 }
+
 async function closeAdmin() {
+  hideAdminGate();
   hideAll();
   // storefront always from server, not local draft
   const ok = await fetchPublished();
@@ -3301,6 +3415,7 @@ async function closeAdmin() {
   fillCatSelect();
   goFilter();
 }
+
 function fillCatSelect() {
   const sel = $("ap-cat");
   if (!sel) return;
@@ -3393,6 +3508,10 @@ function resetEditor() {
   $("ap-weight").value = "";
   $("ap-gender").value = "all";
   $("ap-instock").checked = true;
+  if ($("ap-stone")) $("ap-stone").value = "";
+  if ($("ap-weight-detail")) $("ap-weight-detail").value = "";
+  if ($("ap-silver")) $("ap-silver").value = "";
+  if ($("ap-craft")) $("ap-craft").value = "";
   editorImages = [];
   editorVideos = [];
   editorSizes = [];
@@ -3400,6 +3519,7 @@ function resetEditor() {
   renderEditorVideos();
   renderEditorSizes();
 }
+
 
 function getSessionAdminToken() {
   try { return sessionStorage.getItem(AUTH_KEY) || ""; } catch (e) { return ""; }
@@ -3580,6 +3700,10 @@ function editProduct(idx) {
   $("ap-weight").value = p.weight || "";
   $("ap-gender").value = p.gender || "all";
   $("ap-instock").checked = p.inStock;
+  if ($("ap-stone")) $("ap-stone").value = p.stone || "";
+  if ($("ap-weight-detail")) $("ap-weight-detail").value = p.weightDetail || "";
+  if ($("ap-silver")) $("ap-silver").value = p.silver || "";
+  if ($("ap-craft")) $("ap-craft").value = p.craft || "";
   editorImages = p.images.slice();
   editorVideos = p.videos.slice();
   editorSizes = p.sizes.map(s => ({ name: s.name, stock: s.stock }));
@@ -3597,6 +3721,10 @@ function saveProduct(e) {
     price: $("ap-price").value,
     weight: $("ap-weight").value,
     gender: $("ap-gender").value,
+    stone: $("ap-stone") ? $("ap-stone").value : "",
+    weightDetail: $("ap-weight-detail") ? $("ap-weight-detail").value : "",
+    silver: $("ap-silver") ? $("ap-silver").value : "",
+    craft: $("ap-craft") ? $("ap-craft").value : "",
     images: editorImages.slice(),
     videos: editorVideos.slice(),
     inStock: $("ap-instock").checked,
@@ -3609,6 +3737,7 @@ function saveProduct(e) {
   resetEditor();
   renderAdminList();
 }
+
 async function publishSite() {
   const btn = $("btnPublish");
   if (btn && btn.dataset.publishing === "1") return;
