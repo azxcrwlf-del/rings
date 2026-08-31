@@ -1,0 +1,12 @@
+name = "rings"
+main = "cloudflare/rings-worker.js"
+compatibility_date = "2026-08-31"
+workers_dev = true
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "khatem-ali-media"
+
+[[r2_buckets]]
+binding = "CATALOG_BUCKET"
+bucket_name = "khatem-ali-catalog"
