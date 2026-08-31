@@ -1824,6 +1824,105 @@ img {
 .filter-card .filter-toggle.open{background:#02323d !important;color:#ffffff !important;border-color:#02323d !important}
 </style>
 <style>
+/* ===== SEARCH BAR ===== */
+.search-bar-wrap {
+  max-width: 640px;
+  margin: 0 auto 28px;
+  padding: 0 4px;
+}
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,.92);
+  border: 1.5px solid rgba(201,182,114,.45);
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.08), 0 0 0 1px rgba(201,182,114,.12);
+  transition: border-color .2s, box-shadow .2s;
+}
+.search-bar:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 4px 24px rgba(201,182,114,.22), 0 0 0 3px rgba(201,182,114,.15);
+}
+.search-bar .search-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gold);
+  pointer-events: none;
+  opacity: .85;
+}
+.search-bar input {
+  width: 100%;
+  padding: 15px 48px 15px 44px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink, #0a1620);
+  outline: none;
+  direction: rtl;
+}
+.search-bar input::placeholder {
+  color: #8a9ba8;
+}
+.search-clear {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,.08);
+  color: #445;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+}
+.search-clear:hover {
+  background: rgba(0,0,0,.14);
+}
+/* Results page search (dark theme) */
+#resultsPage .search-bar-wrap {
+  max-width: 720px;
+  margin: 0 auto 24px;
+  padding: 0 16px;
+}
+#resultsPage .search-bar {
+  background: rgba(255,255,255,.07);
+  border-color: rgba(212,192,122,.3);
+  box-shadow: none;
+}
+#resultsPage .search-bar:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212,192,122,.18);
+}
+#resultsPage .search-bar input {
+  color: #f3f0e8;
+}
+#resultsPage .search-bar input::placeholder {
+  color: rgba(243,240,232,.45);
+}
+#resultsPage .search-bar .search-icon {
+  color: var(--gold);
+}
+#resultsPage .search-clear {
+  background: rgba(255,255,255,.12);
+  color: #f3f0e8;
+}
+@media (max-width: 600px) {
+  .search-bar input { font-size: 14px; padding: 13px 44px 13px 40px; }
+  .search-bar-wrap { margin-bottom: 20px; }
+}
+</style>
+<style>
 /* Compact mobile welcome screen: everything stays within one viewport. */
 @media (max-width: 600px) {
   #landing { min-height:100svh; height:100svh; box-sizing:border-box; padding:12px 14px; }
@@ -1911,6 +2010,16 @@ img {
   <div class="filter-wrap">
     <h1 id="siteFilterTitle">اختر ما يناسبك</h1>
     <p class="sub" id="siteFilterSubtitle">حدّد المواصفات والميزانية لنعرض لك القطع المناسبة<br><span class="en" id="siteFilterSubtitleEn">Choose size, weight and budget</span></p>
+
+    <!-- SEARCH BAR -->
+    <div class="search-bar-wrap">
+      <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="search" id="searchInput" placeholder="ابحث بالاسم أو النوع… (عقيق، فضة، يمني…)" autocomplete="off" spellcheck="false" dir="rtl">
+        <button type="button" id="btnClearSearch" class="search-clear" aria-label="مسح" style="display:none">×</button>
+      </div>
+    </div>
+
     <div class="filter-card">
       <div class="filter-groups-grid">
         <details class="filter-group filter-accordion">
@@ -1985,6 +2094,16 @@ img {
       <h1 id="resultsTitle">النتائج</h1>
       <p class="results-meta" id="resultsCount"></p>
     </div>
+
+    <!-- SEARCH BAR (results) -->
+    <div class="search-bar-wrap results-search">
+      <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="search" id="searchInputResults" placeholder="ابحث في النتائج…" autocomplete="off" spellcheck="false" dir="rtl">
+        <button type="button" id="btnClearSearchResults" class="search-clear" aria-label="مسح" style="display:none">×</button>
+      </div>
+    </div>
+
     <div id="resultsGrid" class="grid"></div>
     <p id="resultsEmpty" class="empty-state" style="display:none">لا توجد قطع مطابقة. جرّب مقاساً أو تصنيفاً آخر.</p>
   </div>
@@ -2330,7 +2449,7 @@ let landingAdvanceHandler = null;
 let editorImages = [];
 let editorVideos = [];
 let editorSizes = [];
-let activeFilter = { sizes: [], cats: [], weights: [], genders: [], budgetMin: "", budgetMax: "", showAll: false };
+let activeFilter = { sizes: [], cats: [], weights: [], genders: [], budgetMin: "", budgetMax: "", showAll: false, query: "" };
 let galleryIdx = 0;
 let galleryImages = [];
 let idbInstance = null;
@@ -2754,7 +2873,8 @@ function productHasSize(p, sizes) {
   return (p.sizes || []).some(s => s.stock && sizes.indexOf(s.name) >= 0);
 }
 function getFilteredProducts() {
-  if (activeFilter.showAll) return products.slice();
+  const q = (activeFilter.query || "").trim().toLowerCase();
+  if (activeFilter.showAll && !q) return products.slice();
   let minBudget = Number(activeFilter.budgetMin) || 0;
   let maxBudget = Number(activeFilter.budgetMax) || 0;
   if (minBudget && maxBudget && minBudget > maxBudget) {
@@ -2762,6 +2882,12 @@ function getFilteredProducts() {
   }
   return products.filter(p => {
     if (!p.inStock) return false;
+    if (q) {
+      const name = (p.name || "").toLowerCase();
+      const cat = (p.cat || "").toLowerCase();
+      if (!name.includes(q) && !cat.includes(q)) return false;
+    }
+    if (activeFilter.showAll) return true;
     if (activeFilter.cats.length && activeFilter.cats.indexOf(p.cat) < 0) return false;
     if (activeFilter.weights.length && activeFilter.weights.indexOf(p.weight) < 0) return false;
     if (activeFilter.genders.length && !activeFilter.genders.some(g => p.gender === g || p.gender === "all")) return false;
@@ -2781,8 +2907,18 @@ function applyFilter(showAll) {
     activeFilter.genders = [];
     activeFilter.budgetMin = "";
     activeFilter.budgetMax = "";
+    activeFilter.query = "";
+    const si = $("searchInput");
+    if (si) si.value = "";
+    const si2 = $("searchInputResults");
+    if (si2) si2.value = "";
+    const c1 = $("btnClearSearch"); if (c1) c1.style.display = "none";
+    const c2 = $("btnClearSearchResults"); if (c2) c2.style.display = "none";
     buildFilterUI();
   } else {
+    // pick up current search text
+    const si = $("searchInput");
+    if (si) activeFilter.query = (si.value || "").trim();
     syncBudgetFilter();
   }
   const matched = getFilteredProducts();
@@ -3631,6 +3767,79 @@ function bindUI() {
   const ba = $("btnShowAll");
   if (ba) ba.addEventListener("click", () => applyFilter(true));
 
+  /* ----- SEARCH BAR ----- */
+  function doSearchFrom(inputId, clearId) {
+    const inp = $(inputId);
+    if (!inp) return;
+    activeFilter.query = (inp.value || "").trim();
+    activeFilter.showAll = false;
+    const clearBtn = $(clearId);
+    if (clearBtn) clearBtn.style.display = activeFilter.query ? "flex" : "none";
+    // sync the other search input
+    const otherId = inputId === "searchInput" ? "searchInputResults" : "searchInput";
+    const other = $(otherId);
+    if (other && other.value !== inp.value) other.value = inp.value;
+    const matched = getFilteredProducts();
+    renderResults(matched);
+    goResults();
+  }
+  function clearSearch(inputId, clearId) {
+    const inp = $(inputId);
+    if (inp) inp.value = "";
+    activeFilter.query = "";
+    const clearBtn = $(clearId);
+    if (clearBtn) clearBtn.style.display = "none";
+    const otherId = inputId === "searchInput" ? "searchInputResults" : "searchInput";
+    const other = $(otherId);
+    if (other) other.value = "";
+    const otherClear = otherId === "searchInput" ? "btnClearSearch" : "btnClearSearchResults";
+    const oc = $(otherClear);
+    if (oc) oc.style.display = "none";
+  }
+
+  const searchInput = $("searchInput");
+  if (searchInput) {
+    searchInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        doSearchFrom("searchInput", "btnClearSearch");
+      }
+    });
+    searchInput.addEventListener("input", () => {
+      const clearBtn = $("btnClearSearch");
+      if (clearBtn) clearBtn.style.display = searchInput.value.trim() ? "flex" : "none";
+    });
+  }
+  const btnClearSearch = $("btnClearSearch");
+  if (btnClearSearch) {
+    btnClearSearch.addEventListener("click", () => {
+      clearSearch("searchInput", "btnClearSearch");
+    });
+  }
+
+  const searchInputResults = $("searchInputResults");
+  if (searchInputResults) {
+    searchInputResults.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        doSearchFrom("searchInputResults", "btnClearSearchResults");
+      }
+    });
+    searchInputResults.addEventListener("input", () => {
+      const clearBtn = $("btnClearSearchResults");
+      if (clearBtn) clearBtn.style.display = searchInputResults.value.trim() ? "flex" : "none";
+    });
+  }
+  const btnClearSearchResults = $("btnClearSearchResults");
+  if (btnClearSearchResults) {
+    btnClearSearchResults.addEventListener("click", () => {
+      clearSearch("searchInputResults", "btnClearSearchResults");
+      // re-apply current filters without query
+      const matched = getFilteredProducts();
+      renderResults(matched);
+    });
+  }
+
   const co = $("btnCloseOrder");
   if (co) co.addEventListener("click", closeOrder);
   const order = $("order");
@@ -3713,4 +3922,3 @@ function bindUI() {
 </script>
 </body>
 </html>
-      
