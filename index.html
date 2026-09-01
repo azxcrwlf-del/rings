@@ -829,17 +829,21 @@ footer {
 /* letter-spacing shifts text optically — compensate */
 .landing-eyebrow {
   letter-spacing: 0.32em;
-  padding-inline-start: 0.32em; /* balances extra space after last char */
+  padding-left: 0.32em;
+  padding-right: 0.32em;
   justify-content: center !important;
   width: auto !important;
   max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 .logo-xl {
   letter-spacing: 0.28em;
-  padding-inline-start: 0.28em;
+  padding-left: 0.28em;
+  padding-right: 0.28em;
   text-align: center !important;
   margin-left: auto !important;
   margin-right: auto !important;
+  box-sizing: border-box !important;
 }
 .landing-badge {
   flex-direction: column !important;
@@ -848,8 +852,10 @@ footer {
 }
 .landing-badge .en {
   letter-spacing: 0.2em;
-  padding-inline-start: 0.2em;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
   text-align: center !important;
+  box-sizing: border-box !important;
 }
 .enter-wrap {
   display: flex !important;
@@ -906,30 +912,70 @@ footer {
 }
 
 
-/* ===== OPTICAL NUDGE: desktop only (mobile overflow causes Android de-zoom) ===== */
-@media (min-width: 900px) {
-  #landing .landing-inner,
-  #landing .landing-logo,
-  #landing .landing-eyebrow,
-  #landing .landing-tag,
-  #landing .landing-badge,
-  #landing .enter-wrap,
-  #landing .landing-stars,
-  #landing .landing-divider {
-    transform: translateX(4px) !important;
-  }
+/* ===== LANDING CENTER FIX ===== */
+#landing {
+  display: grid !important;
+  place-items: center !important;
+  justify-items: center !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  padding: 24px max(20px, env(safe-area-inset-left, 0px)) 24px max(20px, env(safe-area-inset-right, 0px)) !important;
+  /* keep particles clipped, but do not use overflow-x tricks that clip RTL content */
+  overflow: hidden !important;
 }
-/* On phones/tablets: zero horizontal shift so layout fits device width */
-@media (max-width: 899px) {
-  #landing .landing-inner,
-  #landing .landing-logo,
-  #landing .landing-eyebrow,
-  #landing .landing-tag,
-  #landing .landing-badge,
-  #landing .enter-wrap,
-  #landing .landing-stars,
-  #landing .landing-divider {
-    transform: none !important;
+#landing .landing-inner {
+  width: 100% !important;
+  max-width: 920px !important;
+  margin: 0 auto !important;
+  padding: 12px 16px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  position: relative !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+}
+#landing .landing-logo {
+  display: block !important;
+  width: min(420px, 86vw) !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 0 auto 10px !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  position: relative !important;
+  left: 0 !important;
+  right: 0 !important;
+  float: none !important;
+}
+#landing .landing-eyebrow,
+#landing .landing-tag,
+#landing .landing-badge,
+#landing .enter-wrap,
+#landing .landing-stars,
+#landing .landing-divider {
+  position: relative !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+}
+@media (max-width: 600px) {
+  #landing {
+    padding: 16px 20px !important;
+  }
+  #landing .landing-inner {
+    padding: 8px 12px !important;
+  }
+  #landing .landing-logo {
+    width: min(300px, 78vw) !important;
+    max-width: 100% !important;
   }
 }
 
@@ -1768,6 +1814,28 @@ footer a {
   color: var(--cream) !important;
 }
 .admin-empty { color: rgba(243,240,232,.4) !important; }
+.feat-admin-card {
+  background: rgba(255,255,255,.04) !important;
+  border-color: rgba(212,192,122,.18) !important;
+}
+.feat-admin-card h3 { color: var(--gold-light) !important; }
+.feat-admin-card label { color: rgba(243,240,232,.5) !important; }
+.feat-admin-card input, .feat-admin-card select {
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(212,192,122,.2) !important;
+  color: var(--cream) !important;
+}
+#featCatsStatus { color: rgba(243,240,232,.45) !important; }
+#btnSaveFeatCats {
+  background: var(--gold-grad) !important;
+  color: #02141c !important;
+  border: 0 !important;
+  padding: 11px 16px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+}
+
 .chip {
   background: rgba(255,255,255,.06) !important;
   border-color: rgba(212,192,122,.2) !important;
@@ -1953,37 +2021,170 @@ img {
 </style>
 <style>
 
-/* ===== ANDROID / MOBILE SCALE FIX ===== */
+
+/* Featured category cards under filters */
+.featured-cats {
+  margin: 22px 0 6px;
+  padding: 0 2px;
+}
+.featured-cats-title {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--teal);
+  margin-bottom: 12px;
+  letter-spacing: .02em;
+}
+.featured-cats-title .en { opacity: .65; font-weight: 500; }
+.featured-cats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.featured-cat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform .22s, box-shadow .22s, border-color .22s;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.featured-cat-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(201,182,114,.45);
+  box-shadow: var(--shadow-md);
+}
+.featured-cat-card:active { transform: translateY(-1px) scale(.98); }
+.featured-cat-name {
+  order: -1;
+  width: 100%;
+  padding: 10px 8px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal);
+  font-family: "Noto Naskh Arabic", serif;
+  line-height: 1.3;
+  min-height: 2.4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.featured-cat-img-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(145deg, #e8e4dc, #ddd6c8);
+  overflow: hidden;
+  position: relative;
+}
+.featured-cat-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .45s cubic-bezier(.2,.8,.3,1);
+}
+.featured-cat-card:hover .featured-cat-img-wrap img { transform: scale(1.06); }
+.featured-cat-img-wrap .ph {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #999;
+}
+.featured-cats.hidden { display: none !important; }
+@media (max-width: 420px) {
+  .featured-cats-grid { gap: 8px; }
+  .featured-cat-name { font-size: 12px; padding: 8px 4px 0; }
+}
+
+/* Admin featured cats editor */
+.feat-admin-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+.feat-admin-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  background: rgba(255,255,255,.04);
+}
+.feat-admin-card h3 {
+  font-size: 13px;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.feat-admin-card label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.feat-admin-card input, .feat-admin-card select {
+  width: 100%;
+  margin-top: 5px;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 11px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 16px;
+  outline: 0;
+}
+.feat-admin-preview {
+  width: 88px;
+  height: 88px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #e8e4dc;
+  border: 1px solid var(--line);
+  margin-top: 8px;
+  display: none;
+}
+.feat-admin-preview.show { display: block; }
+.feat-admin-upload-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+/* ===== ANDROID / MOBILE SCALE FIX (safe — no global max-width that clips landing) ===== */
 html {
   width: 100%;
-  overflow-x: hidden !important;
   -webkit-text-size-adjust: 100% !important;
   text-size-adjust: 100% !important;
 }
 body {
   width: 100% !important;
-  max-width: 100vw !important;
-  overflow-x: hidden !important;
-  min-width: 0 !important;
+  max-width: 100% !important; /* NOT 100vw — avoids left/right clip with scrollbars */
+  overflow-x: hidden;
   -webkit-text-size-adjust: 100% !important;
   text-size-adjust: 100% !important;
 }
-*, *::before, *::after {
-  max-width: 100%;
-  min-width: 0;
-}
 img, video, iframe, canvas, svg {
-  max-width: 100% !important;
+  max-width: 100%;
   height: auto;
 }
-/* Restore intentional min-widths for chips/buttons */
-.size-btn, .budget-btn, .size-chip, .cat-chip, .chip, .nav-actions a, .nav-actions button,
-.enter, .btn-primary, .btn-secondary, .wa, .social-btn, .search-clear {
-  max-width: none;
-  min-width: unset;
+/* Logo must stay fully visible and truly centered */
+#landing .landing-logo {
+  max-width: min(420px, 86vw) !important;
+  width: min(420px, 86vw) !important;
+  height: auto !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: block !important;
 }
-.size-btn { min-width: 48px; }
-.budget-btn { min-width: 0; }
 @media (max-width: 800px) {
   body { font-size: 16px; }
   .product-name { font-size: 15px !important; }
@@ -1992,24 +2193,26 @@ img, video, iframe, canvas, svg {
   .filter-wrap { padding-left: 14px !important; padding-right: 14px !important; }
   .section, .results-head { padding-left: 14px !important; padding-right: 14px !important; }
   .grid { padding-left: 12px !important; padding-right: 12px !important; box-sizing: border-box; }
-  /* logo larger on phone so landing doesn't feel tiny */
-  #landing .landing-logo { width: min(280px, 72vw) !important; max-height: 40svh; }
+  #landing .landing-logo {
+    width: min(300px, 78vw) !important;
+    max-width: min(300px, 78vw) !important;
+  }
   #landing .landing-tag { font-size: clamp(15px, 4.2vw, 18px) !important; }
   #landing .enter { padding: 14px 28px !important; font-size: 15px !important; }
 }
 
 /* Compact mobile welcome screen: everything stays within one viewport. */
 @media (max-width: 600px) {
-  #landing { min-height:100svh; height:100svh; box-sizing:border-box; padding:12px 14px; }
-  #landing .landing-inner { width:100%; box-sizing:border-box; max-height:calc(100svh - 24px); padding:4px 8px; }
-  #landing .landing-stars { margin-bottom:clamp(4px,1.5vh,10px); }
+  #landing { min-height:100svh; height:100svh; box-sizing:border-box; padding:16px 20px !important; }
+  #landing .landing-inner { width:100%; box-sizing:border-box; max-height:calc(100svh - 32px); padding:8px 12px !important; align-items:center !important; }
+  #landing .landing-stars { margin-bottom:clamp(4px,1.5vh,10px); justify-content:center !important; width:100% !important; }
   #landing .landing-eyebrow { margin-bottom:clamp(6px,1.6vh,12px); }
-  #landing .landing-logo { width:min(210px,52vw) !important; max-height:35svh; object-fit:contain; margin-bottom:4px; }
-  #landing .landing-tag { margin-top:clamp(7px,1.5vh,14px); font-size:clamp(13px,3.8vw,16px); line-height:1.45; }
+  #landing .landing-logo { width:min(300px,78vw) !important; max-width:100% !important; max-height:38svh; object-fit:contain; object-position:center; margin:0 auto 6px !important; }
+  #landing .landing-tag { margin-top:clamp(7px,1.5vh,14px); font-size:clamp(14px,4vw,17px); line-height:1.45; text-align:center !important; }
   #landing .landing-tag .en { margin-top:3px; font-size:11px; }
   #landing .landing-divider { height:clamp(16px,3vh,26px); margin-top:clamp(10px,2vh,16px); }
   #landing .enter { padding:12px 24px; font-size:14px; }
-  #landing .landing-badge { margin-top:clamp(10px,2vh,18px); font-size:11px; }
+  #landing .landing-badge { margin-top:clamp(10px,2vh,18px); font-size:11px; text-align:center !important; }
 }
 </style>
 <style>
@@ -2122,6 +2325,10 @@ img, video, iframe, canvas, svg {
           </div>
         </details>
 
+      </div>
+      <div class="featured-cats" id="featuredCats" style="display:none">
+        <div class="featured-cats-title">تصنيفات مميزة <span class="en">Featured</span></div>
+        <div class="featured-cats-grid" id="featuredCatsGrid"></div>
       </div>
       <div class="filter-actions">
         <button type="button" class="btn-primary" id="btnApplyFilter">عرض النتائج</button>
@@ -2395,6 +2602,17 @@ img, video, iframe, canvas, svg {
     </div>
 
 \n    <div class="admin-card" id="siteContentEditor"><h2>محتوى الموقع <span class="en">Site content</span></h2><p class="admin-note">عدّل النصوص الظاهرة في الصفحة الرئيسية وقسم التواصل. احفظ المسودة ثم اضغط نشر المنتجات لنشر كل التغييرات.</p><div class="site-content-grid"><label>العنوان الصغير<input id="site-landing-eyebrow" maxlength="120"></label><label>عنوان الواجهة<input id="site-landing-tag" maxlength="180"></label><label>العنوان بالإنجليزية<input id="site-landing-tag-en" maxlength="180" dir="ltr"></label><label>الموقع المختصر<input id="site-landing-badge" maxlength="180"></label><label>الموقع بالإنجليزية<input id="site-landing-badge-en" maxlength="180" dir="ltr"></label><label>عنوان صفحة الاختيار<input id="site-filter-title" maxlength="180"></label><label>وصف صفحة الاختيار<input id="site-filter-subtitle" maxlength="240"></label><label>وصف صفحة الاختيار بالإنجليزية<input id="site-filter-subtitle-en" maxlength="240" dir="ltr"></label><label>عنوان الموقع<input id="site-location-title" maxlength="120"></label><label>النص الإنجليزي للموقع<input id="site-location-en" maxlength="180" dir="ltr"></label><label>تفاصيل الموقع<textarea id="site-location-body" rows="3" maxlength="500"></textarea></label><label>عنوان التواصل<input id="site-contact-title" maxlength="120"></label><label>تفاصيل التواصل<textarea id="site-contact-body" rows="3" maxlength="500"></textarea></label><label>التواصل بالإنجليزية<input id="site-contact-en" maxlength="240" dir="ltr"></label></div><div class="site-content-actions"><span id="siteContentStatus">المسودة محفوظة داخل هذا الجهاز فقط حتى يتم النشر.</span><button type="button" id="btnSaveSiteContent">حفظ مسودة النصوص</button></div></div>\n
+    
+    <div class="admin-card" id="featuredCatsEditor">
+      <h2>تصنيفات مميزة <span class="en">Featured categories</span></h2>
+      <p class="admin-note">ثلاث بطاقات تظهر تحت الفلاتر وقبل زر «عرض كل القطع». الاسم فوق الصورة، والنقر يفتح منتجات التصنيف المرتبط. ارفع الصورة بنفس طريقة رفع صور المنتجات ثم احفظ المسودة وانشر.</p>
+      <div class="feat-admin-grid" id="featAdminGrid"></div>
+      <div class="site-content-actions" style="margin-top:14px">
+        <span id="featCatsStatus">المسودة محلية حتى النشر</span>
+        <button type="button" id="btnSaveFeatCats">حفظ مسودة التصنيفات</button>
+      </div>
+    </div>
+
     <div class="admin-card" id="productEditor">
       <h2 id="editorTitle">إضافة منتج</h2>
       <form class="admin-form" id="productForm">
@@ -2547,6 +2765,13 @@ const defaultProducts = [];
 
     const defaultSiteContent = { landingEyebrow: "أصلي · فضة · حجر كريم", landingTag: "أحجار كريمة أصلية وخواتم فضة للرجال والنساء", landingTagEn: "Genuine stones & silver rings", landingBadge: "محمّدية مول · المحمّدية", landingBadgeEn: "Mohammedia Mall · Algiers", filterTitle: "اختر ما يناسبك", filterSubtitle: "حدّد المواصفات والميزانية لنعرض لك القطع المناسبة", filterSubtitleEn: "Choose size, weight and budget", locationTitle: "الموقع", locationBody: "محمّدية مول — المحل رقم 980\\nمركز تجاري وأعمال، المحمّدية 16000\\nبيع الأحجار الكريمة الأصلية ومجوهرات وخواتم رجالية ونسائية", locationEn: "Mohammedia Mall · Local n°980 · Algiers", contactTitle: "تواصل معنا", contactBody: "للاستفسار عن الأحجار أو المقاسات أو الطلبات الخاصة", contactEn: "Questions about stones, sizing or custom orders" };
     let siteContent = Object.assign({}, defaultSiteContent);
+const defaultFeaturedCats = [
+  { name: "", image: "", cat: "" },
+  { name: "", image: "", cat: "" },
+  { name: "", image: "", cat: "" }
+];
+let featuredCats = defaultFeaturedCats.map(function(c){ return Object.assign({}, c); });
+
     
 let categories = [];
 let products = [];
@@ -2675,6 +2900,7 @@ function idbSet(key, val) {
     setSiteText("siteContactTitle", siteContent.contactTitle);
     setSiteText("siteContactBody", siteContent.contactBody, true);
     setSiteText("siteContactEn", siteContent.contactEn);
+    renderFeaturedCats();
     }
     function renderSiteContentEditor() {
     const fields = { landingEyebrow: "site-landing-eyebrow", landingTag: "site-landing-tag", landingTagEn: "site-landing-tag-en", landingBadge: "site-landing-badge", landingBadgeEn: "site-landing-badge-en", filterTitle: "site-filter-title", filterSubtitle: "site-filter-subtitle", filterSubtitleEn: "site-filter-subtitle-en", locationTitle: "site-location-title", locationBody: "site-location-body", locationEn: "site-location-en", contactTitle: "site-contact-title", contactBody: "site-contact-body", contactEn: "site-contact-en" };
@@ -2695,6 +2921,7 @@ function saveDraft() {
       categories: categories.slice(),
       products: products.map(normalizeProduct),
       siteContent: Object.assign({}, siteContent),
+      featuredCats: normalizeFeaturedCats(featuredCats),
       savedAt: new Date().toISOString()
     };
     return idbSet(IDB_KEY, payload).catch(function(err){ console.warn("saveDraft", err); });
@@ -2710,6 +2937,8 @@ async function loadDraft() {
       products = data.products.map(normalizeProduct);
       categories = Array.isArray(data.categories) ? data.categories.filter(Boolean) : [];
       if (data.siteContent) applySiteContent(data.siteContent);
+      if (data.featuredCats) applyFeaturedCats(data.featuredCats);
+      else renderFeaturedCats();
       normalizeCatalog();
       return true;
     }
@@ -2722,6 +2951,7 @@ function applyBaked() {
   applySiteContent(defaultSiteContent);
   categories = (defaultCategories || []).slice();
   products = JSON.parse(JSON.stringify(defaultProducts || [])).map(normalizeProduct);
+  applyFeaturedCats(defaultFeaturedCats);
   normalizeCatalog();
 }
 function normalizeCatalog() {
@@ -2734,12 +2964,14 @@ function normalizeCatalog() {
 }
 function applyRemote(data) {
   if (!data || typeof data !== "object") return false;
-  if (Array.isArray(data.products) && data.products.length === 0 && Array.isArray(data.categories) && data.categories.length === 0 && !data.siteContent) return false;
+  if (Array.isArray(data.products) && data.products.length === 0 && Array.isArray(data.categories) && data.categories.length === 0 && !data.siteContent && !data.featuredCats) return false;
   if (data.siteContent) applySiteContent(data.siteContent);
   if (Array.isArray(data.categories)) categories = data.categories.filter(Boolean);
   if (Array.isArray(data.products)) products = data.products.map(normalizeProduct);
   else if (Array.isArray(data)) products = data.map(normalizeProduct);
   else return false;
+  if (data.featuredCats) applyFeaturedCats(data.featuredCats);
+  else renderFeaturedCats();
   normalizeCatalog();
   return true;
 }
@@ -2846,6 +3078,7 @@ function goFilter(e) {
   }
   if (location.hash !== "#filter") location.hash = "#filter";
   buildFilterUI();
+  renderFeaturedCats();
   window.scrollTo(0, 0);
 }
 function goResults() {
@@ -2874,6 +3107,218 @@ function handleRoute() {
   }
   if (!h || h === "#") goHome();
 }
+
+
+function normalizeFeaturedCats(list) {
+  const src = Array.isArray(list) ? list : [];
+  const out = [];
+  for (let i = 0; i < 3; i++) {
+    const c = src[i] || {};
+    out.push({
+      name: String(c.name || "").trim(),
+      image: String(c.image || "").trim(),
+      cat: String(c.cat || "").trim()
+    });
+  }
+  return out;
+}
+function applyFeaturedCats(list) {
+  featuredCats = normalizeFeaturedCats(list);
+  renderFeaturedCats();
+  renderFeaturedCatsEditor();
+}
+function renderFeaturedCats() {
+  const wrap = $("featuredCats");
+  const grid = $("featuredCatsGrid");
+  if (!wrap || !grid) return;
+  const items = (featuredCats || []).filter(c => c && (c.name || c.image || c.cat));
+  if (!items.length) {
+    wrap.style.display = "none";
+    grid.innerHTML = "";
+    return;
+  }
+  grid.innerHTML = "";
+  items.forEach((c, idx) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "featured-cat-card";
+    btn.setAttribute("aria-label", c.name || ("تصنيف " + (idx + 1)));
+    const name = document.createElement("div");
+    name.className = "featured-cat-name";
+    name.textContent = c.name || "تصنيف";
+    const imgWrap = document.createElement("div");
+    imgWrap.className = "featured-cat-img-wrap";
+    if (c.image) {
+      const img = document.createElement("img");
+      img.alt = c.name || "";
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.referrerPolicy = "no-referrer";
+      img.src = optimizeImgUrl(c.image);
+      img.onerror = function() {
+        this.style.display = "none";
+        const ph = document.createElement("div");
+        ph.className = "ph";
+        ph.textContent = "صورة";
+        imgWrap.appendChild(ph);
+      };
+      imgWrap.appendChild(img);
+    } else {
+      const ph = document.createElement("div");
+      ph.className = "ph";
+      ph.textContent = "صورة";
+      imgWrap.appendChild(ph);
+    }
+    btn.appendChild(name);
+    btn.appendChild(imgWrap);
+    btn.addEventListener("click", function() {
+      openFeaturedCategory(c);
+    });
+    grid.appendChild(btn);
+  });
+  wrap.style.display = "";
+}
+function openFeaturedCategory(c) {
+  activeFilter.showAll = false;
+  activeFilter.sizes = [];
+  activeFilter.weights = [];
+  activeFilter.genders = [];
+  activeFilter.budgetMin = "";
+  activeFilter.budgetMax = "";
+  activeFilter.query = "";
+  activeFilter.cats = c.cat ? [c.cat] : [];
+  const si = $("searchInput"); if (si) si.value = "";
+  const si2 = $("searchInputResults"); if (si2) si2.value = "";
+  const c1 = $("btnClearSearch"); if (c1) c1.style.display = "none";
+  const c2 = $("btnClearSearchResults"); if (c2) c2.style.display = "none";
+  buildFilterUI();
+  const matched = getFilteredProducts();
+  renderResults(matched);
+  goResults();
+}
+function renderFeaturedCatsEditor() {
+  const grid = $("featAdminGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+  featuredCats = normalizeFeaturedCats(featuredCats);
+  featuredCats.forEach((c, i) => {
+    const card = document.createElement("div");
+    card.className = "feat-admin-card";
+    card.innerHTML =
+      "<h3>البطاقة " + (i + 1) + "</h3>" +
+      "<label>الاسم (يظهر فوق الصورة)" +
+      '<input type="text" id="feat-name-' + i + '" maxlength="60" placeholder="مثال: عقيق يمني" value="' + escapeHtml(c.name).replace(/"/g, "&quot;") + '">' +
+      "</label>" +
+      "<label>التصنيف المرتبط (منتجات هذا التصنيف تظهر عند النقر)" +
+      '<select id="feat-cat-' + i + '"></select></label>' +
+      "<label>رابط الصورة" +
+      '<input type="url" id="feat-img-' + i + '" inputmode="url" dir="ltr" placeholder="https://.../image.jpg" value="' + escapeHtml(c.image).replace(/"/g, "&quot;") + '">' +
+      "</label>" +
+      '<img class="feat-admin-preview' + (c.image ? " show" : "") + '" id="feat-preview-' + i + '" alt=""' + (c.image ? ' src="' + escapeHtml(c.image).replace(/"/g, "&quot;") + '"' : "") + ' referrerpolicy="no-referrer">' +
+      '<div class="feat-admin-upload-row">' +
+      '<label class="media-upload-button" for="feat-file-' + i + '">رفع من الهاتف</label>' +
+      '<input type="file" id="feat-file-' + i + '" accept="image/*" style="display:none">' +
+      '<span class="media-upload-status" id="feat-status-' + i + '"></span>' +
+      "</div>";
+    grid.appendChild(card);
+    const sel = card.querySelector("#feat-cat-" + i);
+    const opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = "— اختر تصنيفاً —";
+    sel.appendChild(opt0);
+    (categories || []).forEach(function(catName) {
+      const o = document.createElement("option");
+      o.value = catName;
+      o.textContent = catName;
+      if (catName === c.cat) o.selected = true;
+      sel.appendChild(o);
+    });
+    const imgInput = card.querySelector("#feat-img-" + i);
+    const preview = card.querySelector("#feat-preview-" + i);
+    imgInput.addEventListener("input", function() {
+      const v = imgInput.value.trim();
+      if (v) {
+        preview.src = v;
+        preview.classList.add("show");
+      } else {
+        preview.removeAttribute("src");
+        preview.classList.remove("show");
+      }
+    });
+    const fileInput = card.querySelector("#feat-file-" + i);
+    fileInput.addEventListener("change", function(ev) {
+      uploadFeaturedCatImage(i, ev.target.files);
+    });
+  });
+}
+async function uploadFeaturedCatImage(index, fileList) {
+  const files = Array.from(fileList || []);
+  const input = $("feat-file-" + index);
+  if (input) input.value = "";
+  if (!files.length) return;
+  const status = $("feat-status-" + index);
+  if (!R2_UPLOAD_READY) {
+    if (status) { status.textContent = "الرفع غير مفعّل بعد"; status.className = "media-upload-status error"; }
+    alert("Cloudflare R2 لم يُفعّل بعد.");
+    return;
+  }
+  const token = getSessionAdminToken();
+  if (!token) { alert("سجّل الدخول إلى لوحة الإدارة أولاً."); return; }
+  const file = files[0];
+  if (!file.type || file.type.indexOf("image/") !== 0) {
+    alert("اختر ملف صورة فقط.");
+    return;
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    alert("الصورة كبيرة جداً.");
+    return;
+  }
+  if (status) { status.textContent = "جاري الرفع…"; status.className = "media-upload-status"; }
+  try {
+    const form = new FormData();
+    form.append("file", file, file.name);
+    const r = await fetch(R2_UPLOAD_API + "/upload", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token },
+      body: form
+    });
+    const data = await r.json().catch(function(){ return {}; });
+    if (!r.ok || !data.url) throw new Error(data.error || "upload failed");
+    const imgInput = $("feat-img-" + index);
+    if (imgInput) imgInput.value = data.url;
+    const preview = $("feat-preview-" + index);
+    if (preview) {
+      preview.src = data.url;
+      preview.classList.add("show");
+    }
+    if (status) { status.textContent = "تم الرفع — احفظ المسودة ثم انشر"; status.className = "media-upload-status ok"; }
+  } catch (e) {
+    if (status) { status.textContent = "فشل الرفع"; status.className = "media-upload-status error"; }
+    alert("تعذّر رفع الصورة. حاول مرة أخرى.");
+  }
+}
+function collectFeaturedCatsFromEditor() {
+  const out = [];
+  for (let i = 0; i < 3; i++) {
+    const nameEl = $("feat-name-" + i);
+    const imgEl = $("feat-img-" + i);
+    const catEl = $("feat-cat-" + i);
+    out.push({
+      name: nameEl ? nameEl.value.trim() : "",
+      image: imgEl ? imgEl.value.trim() : "",
+      cat: catEl ? catEl.value.trim() : ""
+    });
+  }
+  return normalizeFeaturedCats(out);
+}
+function saveFeaturedCatsDraft() {
+  featuredCats = collectFeaturedCatsFromEditor();
+  saveDraft();
+  renderFeaturedCats();
+  const st = $("featCatsStatus");
+  if (st) st.textContent = "تم حفظ مسودة التصنيفات — انشر ليراها الزوار";
+}
+
 
 /* ---------- filter / results ---------- */
 function parsePrice(value) {
@@ -3503,6 +3948,7 @@ async function enterAdmin() {
   renderCatList();
   renderAdminList();
   renderSiteContentEditor();
+  renderFeaturedCatsEditor();
   fillCatSelect();
 }
 
@@ -3519,15 +3965,21 @@ async function closeAdmin() {
 
 function fillCatSelect() {
   const sel = $("ap-cat");
-  if (!sel) return;
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">— بدون —</option>';
-  categories.forEach(c => {
-    const o = document.createElement("option");
-    o.value = c; o.textContent = c;
-    sel.appendChild(o);
-  });
-  if (cur) sel.value = cur;
+  if (sel) {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— بدون —</option>';
+    categories.forEach(c => {
+      const o = document.createElement("option");
+      o.value = c; o.textContent = c;
+      sel.appendChild(o);
+    });
+    if (cur) sel.value = cur;
+  }
+  // refresh featured-cat linked selects if admin editor is open
+  if ($("feat-name-0") && $("admin") && $("admin").classList.contains("active")) {
+    featuredCats = collectFeaturedCatsFromEditor();
+    renderFeaturedCatsEditor();
+  }
 }
 function renderCatList() {
   const box = $("catList");
@@ -3561,6 +4013,7 @@ function addCategory() {
   saveDraft();
   renderCatList();
   fillCatSelect();
+  renderFeaturedCatsEditor();
 }
 function renderAdminList() {
   const list = $("adminList");
@@ -3844,8 +4297,10 @@ async function publishSite() {
   if (btn && btn.dataset.publishing === "1") return;
   const token = (() => { try { return sessionStorage.getItem(AUTH_KEY) || ""; } catch (e) { return ""; } })();
   if (!token) { alert("انتهت جلسة الإدارة. افتح لوحة الإدارة وسجّل الدخول مرة أخرى."); return; }
+  // pick up featured cats from editor if present
+  if ($("featAdminGrid")) featuredCats = collectFeaturedCatsFromEditor();
   saveDraft();
-  const payload = { categories: categories.slice(), products: products.map(normalizeProduct), siteContent: Object.assign({}, siteContent), updatedAt: new Date().toISOString() };
+  const payload = { categories: categories.slice(), products: products.map(normalizeProduct), siteContent: Object.assign({}, siteContent), featuredCats: normalizeFeaturedCats(featuredCats), updatedAt: new Date().toISOString() };
   if (btn) { btn.dataset.publishing = "1"; btn.disabled = true; btn.textContent = "جاري النشر…"; }
   setPublishStatus("جاري نشر المنتجات مباشرة… (" + products.length + " منتج)");
   try {
@@ -3871,6 +4326,7 @@ function exportProducts() {
     categories: categories.slice(),
     products: products.map(normalizeProduct),
     siteContent: Object.assign({}, siteContent),
+    featuredCats: normalizeFeaturedCats(featuredCats),
     updatedAt: new Date().toISOString()
   };
   downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }), "khatem-backup.json");
@@ -4115,6 +4571,8 @@ function bindUI() {
 
   const saveSite = $("btnSaveSiteContent");
   if (saveSite) saveSite.addEventListener("click", saveSiteContentDraft);
+  const saveFeat = $("btnSaveFeatCats");
+  if (saveFeat) saveFeat.addEventListener("click", saveFeaturedCatsDraft);
   const pub = $("btnPublish");
   if (pub) pub.addEventListener("click", publishSite);
   const exp = $("btnExport");
