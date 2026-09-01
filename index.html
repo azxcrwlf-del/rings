@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <meta name="theme-color" content="#011220">
 <title>خاتم علي — أحجار كريمة وفضة أصلية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -906,39 +906,7 @@ footer {
 }
 
 
-/* ===== OPTICAL NUDGE: counter left-drift on phone ===== */
-#landing .landing-inner {
-  /* shift content a bit to the right (screen left → center) */
-  transform: translateX(6px) !important;
-}
-#landing .landing-logo {
-  transform: translateX(4px) !important;
-  opacity: 1 !important;
-}
-#landing .landing-eyebrow,
-#landing .landing-tag,
-#landing .landing-badge,
-#landing .enter-wrap,
-#landing .landing-stars,
-#landing .landing-divider {
-  transform: translateX(6px) !important;
-}
-@media (max-width: 480px) {
-  #landing .landing-inner {
-    transform: translateX(8px) !important;
-  }
-  #landing .landing-logo {
-    transform: translateX(6px) !important;
-  }
-  #landing .landing-eyebrow,
-  #landing .landing-tag,
-  #landing .landing-badge,
-  #landing .enter-wrap,
-  #landing .landing-stars,
-  #landing .landing-divider {
-    transform: translateX(8px) !important;
-  }
-}
+/* ===== OPTICAL NUDGE: desktop only (mobile overflow causes Android de-zoom) ===== */
 @media (min-width: 900px) {
   #landing .landing-inner,
   #landing .landing-logo,
@@ -951,7 +919,19 @@ footer {
     transform: translateX(4px) !important;
   }
 }
-
+/* On phones/tablets: zero horizontal shift so layout fits device width */
+@media (max-width: 899px) {
+  #landing .landing-inner,
+  #landing .landing-logo,
+  #landing .landing-eyebrow,
+  #landing .landing-tag,
+  #landing .landing-badge,
+  #landing .enter-wrap,
+  #landing .landing-stars,
+  #landing .landing-divider {
+    transform: none !important;
+  }
+}
 
 /* ===== SITE-WIDE POLISH (filter / results / contact / cards) ===== */
 /* Keep color scheme: teal-deep #011220, teal #02323d, gold #c9b672 */
@@ -1415,16 +1395,16 @@ body {
   animation: landLogo 1.2s cubic-bezier(.16,1,.3,1) .25s forwards, logoFloat 5.5s ease-in-out 1.45s infinite !important;
 }
 @keyframes logoFloat {
-  0%, 100% { transform: translateX(6px) translateY(0); }
-  50% { transform: translateX(6px) translateY(-8px); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 @media (max-width: 480px) {
   .landing-logo {
     animation: landLogo 1.2s cubic-bezier(.16,1,.3,1) .25s forwards, logoFloatM 5.5s ease-in-out 1.45s infinite !important;
   }
   @keyframes logoFloatM {
-    0%, 100% { transform: translateX(8px) translateY(0); }
-    50% { transform: translateX(8px) translateY(-6px); }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
   }
 }
 .landing-tag {
@@ -1972,6 +1952,52 @@ img {
 }
 </style>
 <style>
+
+/* ===== ANDROID / MOBILE SCALE FIX ===== */
+html {
+  width: 100%;
+  overflow-x: hidden !important;
+  -webkit-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+}
+body {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  min-width: 0 !important;
+  -webkit-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+}
+*, *::before, *::after {
+  max-width: 100%;
+  min-width: 0;
+}
+img, video, iframe, canvas, svg {
+  max-width: 100% !important;
+  height: auto;
+}
+/* Restore intentional min-widths for chips/buttons */
+.size-btn, .budget-btn, .size-chip, .cat-chip, .chip, .nav-actions a, .nav-actions button,
+.enter, .btn-primary, .btn-secondary, .wa, .social-btn, .search-clear {
+  max-width: none;
+  min-width: unset;
+}
+.size-btn { min-width: 48px; }
+.budget-btn { min-width: 0; }
+@media (max-width: 800px) {
+  body { font-size: 16px; }
+  .product-name { font-size: 15px !important; }
+  .product-price { font-size: 14px !important; }
+  .nav-inner { padding: 12px 14px !important; }
+  .filter-wrap { padding-left: 14px !important; padding-right: 14px !important; }
+  .section, .results-head { padding-left: 14px !important; padding-right: 14px !important; }
+  .grid { padding-left: 12px !important; padding-right: 12px !important; box-sizing: border-box; }
+  /* logo larger on phone so landing doesn't feel tiny */
+  #landing .landing-logo { width: min(280px, 72vw) !important; max-height: 40svh; }
+  #landing .landing-tag { font-size: clamp(15px, 4.2vw, 18px) !important; }
+  #landing .enter { padding: 14px 28px !important; font-size: 15px !important; }
+}
+
 /* Compact mobile welcome screen: everything stays within one viewport. */
 @media (max-width: 600px) {
   #landing { min-height:100svh; height:100svh; box-sizing:border-box; padding:12px 14px; }
