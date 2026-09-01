@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <meta name="theme-color" content="#011220">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; media-src 'self' https: blob:; connect-src 'self' https://rings.azxcrwlf.workers.dev; frame-src https://www.youtube.com https://youtube.com https://player.vimeo.com; object-src 'none'; base-uri 'self'; form-action 'self';">
 <title>خاتم علي — أحجار كريمة وفضة أصلية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="dns-prefetch" href="https://picsum.photos">
@@ -2812,8 +2813,8 @@ function normalizeProduct(p) {
     weightDetail: String(p.weightDetail || "").trim(),
     silver: String(p.silver || "").trim(),
     craft: String(p.craft || "").trim(),
-    images: Array.isArray(p.images) ? p.images.filter(Boolean) : [],
-    videos: Array.isArray(p.videos) ? p.videos.map(v => String(v || "").trim()).filter(Boolean) : [],
+    images: Array.isArray(p.images) ? p.images.map(function(u){ return safeUrl(u); }).filter(Boolean) : [],
+    videos: Array.isArray(p.videos) ? p.videos.map(function(v){ return String(v || "").trim(); }).filter(function(v){ return !!getVideoSource(v) || !!safeUrl(v); }) : [],
     inStock: p.inStock !== false,
     sizes: Array.isArray(p.sizes)
       ? p.sizes.map(s => ({ name: String(s.name || s).trim(), stock: s.stock !== false })).filter(s => s.name)
@@ -2912,7 +2913,9 @@ function idbSet(key, val) {
     setSiteText("siteContactTitle", siteContent.contactTitle);
     setSiteText("siteContactBody", siteContent.contactBody, true);
     setSiteText("siteContactEn", siteContent.contactEn);
-    renderFeaturedCats();
+    // featured categories live inside siteContent so the Worker persists them
+    if (siteContent.featuredCats) applyFeaturedCats(siteContent.featuredCats);
+    else renderFeaturedCats();
     }
     function renderSiteContentEditor() {
     const fields = { landingEyebrow: "site-landing-eyebrow", landingTag: "site-landing-tag", landingTagEn: "site-landing-tag-en", landingBadge: "site-landing-badge", landingBadgeEn: "site-landing-badge-en", filterTitle: "site-filter-title", filterSubtitle: "site-filter-subtitle", filterSubtitleEn: "site-filter-subtitle-en", locationTitle: "site-location-title", locationBody: "site-location-body", locationEn: "site-location-en", contactTitle: "site-contact-title", contactBody: "site-contact-body", contactEn: "site-contact-en" };
@@ -2929,11 +2932,13 @@ function idbSet(key, val) {
     
 function saveDraft() {
   try {
+    const fc = normalizeFeaturedCats(featuredCats);
+    siteContent.featuredCats = fc;
     const payload = {
       categories: categories.slice(),
       products: products.map(normalizeProduct),
-      siteContent: Object.assign({}, siteContent),
-      featuredCats: normalizeFeaturedCats(featuredCats),
+      siteContent: Object.assign({}, siteContent, { featuredCats: fc }),
+      featuredCats: fc,
       savedAt: new Date().toISOString()
     };
     return idbSet(IDB_KEY, payload).catch(function(err){ console.warn("saveDraft", err); });
@@ -2982,7 +2987,9 @@ function applyRemote(data) {
   if (Array.isArray(data.products)) products = data.products.map(normalizeProduct);
   else if (Array.isArray(data)) products = data.map(normalizeProduct);
   else return false;
+  // Prefer top-level featuredCats; fallback to siteContent.featuredCats (Worker may only keep siteContent)
   if (data.featuredCats) applyFeaturedCats(data.featuredCats);
+  else if (data.siteContent && data.siteContent.featuredCats) applyFeaturedCats(data.siteContent.featuredCats);
   else renderFeaturedCats();
   normalizeCatalog();
   return true;
@@ -3127,9 +3134,9 @@ function normalizeFeaturedCats(list) {
   for (let i = 0; i < 3; i++) {
     const c = src[i] || {};
     out.push({
-      name: String(c.name || "").trim(),
-      image: String(c.image || "").trim(),
-      cat: String(c.cat || "").trim()
+      name: String(c.name || "").trim().slice(0, 80),
+      image: safeUrl(c.image || ""),
+      cat: String(c.cat || "").trim().slice(0, 80)
     });
   }
   return out;
@@ -3325,6 +3332,7 @@ function collectFeaturedCatsFromEditor() {
 }
 function saveFeaturedCatsDraft() {
   featuredCats = collectFeaturedCatsFromEditor();
+  siteContent.featuredCats = normalizeFeaturedCats(featuredCats);
   saveDraft();
   renderFeaturedCats();
   const st = $("featCatsStatus");
@@ -3610,9 +3618,9 @@ function appendResultBatch() {
     const meta = [p.weight ? (p.weight === "above30" ? "أكثر من 30 غ" : p.weight.replace("-", "–") + " غ") : "", p.gender && p.gender !== "all" ? genderLabel(p.gender) : ""].filter(Boolean).join(" · ");
 
     let imgHtml;
-    if (src) {
-      // lazy + async decode; low priority on phone
-      imgHtml = '<img class="product-img" alt="" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="no-referrer" src="' + src + '" onerror="this.onerror=null;this.style.display=\'none\';this.parentNode&&this.parentNode.classList.add(\'img-broken\')">';
+    const safeSrc = safeUrl(src);
+    if (safeSrc) {
+      imgHtml = '<img class="product-img" alt="" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="no-referrer" src="' + safeAttr(safeSrc) + '">';
     } else {
       imgHtml = '<div class="product-img placeholder">صورة</div>';
     }
@@ -3658,6 +3666,21 @@ function escapeHtml(s) {
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   })[c]);
 }
+/** Only allow http(s) URLs — blocks javascript:/data: XSS in src/href */
+function safeUrl(raw) {
+  const value = String(raw == null ? "" : raw).trim();
+  if (!value) return "";
+  let u;
+  try { u = new URL(value, location.href); } catch (e) { return ""; }
+  if (u.protocol !== "https:" && u.protocol !== "http:") return "";
+  // reject obvious script injection in URL
+  if (/[<>"']/.test(value)) return "";
+  return u.href;
+}
+function safeAttr(s) {
+  return escapeHtml(String(s == null ? "" : s));
+}
+
 
 /* ---------- product modal ---------- */
 function getVideoSource(raw) {
@@ -3812,7 +3835,11 @@ function showGalleryAt(i) {
     img.style.display = "block";
     img.loading = "eager";
     img.decoding = "async";
-    img.referrerPolicy = "no-referrer"; img.src = optimizeImgUrl(galleryImages[galleryIdx]); img.onerror = function(){ this.onerror=null; this.alt="صورة غير متاحة"; this.style.opacity="0.4"; };
+    img.referrerPolicy = "no-referrer";
+    const gSrc = safeUrl(optimizeImgUrl(galleryImages[galleryIdx]));
+    if (gSrc) { img.src = gSrc; img.style.opacity = "1"; }
+    else { img.removeAttribute("src"); img.style.opacity = "0.4"; img.alt = "صورة غير متاحة"; }
+    img.onerror = function(){ this.onerror=null; this.alt="صورة غير متاحة"; this.style.opacity="0.4"; };
   }
   if (galleryImages.length > 1) {
     if (nav) nav.style.display = "flex";
@@ -4039,8 +4066,9 @@ function renderAdminList() {
     p = normalizeProduct(p);
     const row = document.createElement("div");
     row.className = "admin-item";
-    const thumb = displayImg(p)
-      ? '<img class="admin-thumb" src="' + displayImg(p) + '" alt="" referrerpolicy="no-referrer" onerror="this.style.opacity=0.3">'
+    const thumbSrc = safeUrl(displayImg(p));
+    const thumb = thumbSrc
+      ? '<img class="admin-thumb" src="' + safeAttr(thumbSrc) + '" alt="" referrerpolicy="no-referrer">'
       : '<div class="admin-thumb"></div>';
     const oos = p.inStock ? "" : '<span class="badge-oos">غير متوفر</span>';
     row.innerHTML = thumb +
@@ -4168,7 +4196,10 @@ function renderEditorImages() {
   editorImages.forEach((src, i) => {
     const d = document.createElement("div");
     d.className = "admin-img-item";
-    d.innerHTML = '<img src="' + src + '" alt="" referrerpolicy="no-referrer" onerror="this.style.opacity=0.35"><button type="button" class="rm">×</button>';
+    const safeSrc = safeUrl(src);
+    d.innerHTML = (safeSrc
+      ? '<img src="' + safeAttr(safeSrc) + '" alt="" referrerpolicy="no-referrer">'
+      : '<div class="admin-thumb"></div>') + '<button type="button" class="rm">×</button>';
     d.querySelector(".rm").onclick = () => removeEditorMedia("image", src, i);
     box.appendChild(d);
   });
@@ -4310,9 +4341,19 @@ async function publishSite() {
   const token = (() => { try { return sessionStorage.getItem(AUTH_KEY) || ""; } catch (e) { return ""; } })();
   if (!token) { alert("انتهت جلسة الإدارة. افتح لوحة الإدارة وسجّل الدخول مرة أخرى."); return; }
   // pick up featured cats from editor if present
-  if ($("featAdminGrid")) featuredCats = collectFeaturedCatsFromEditor();
+  if ($("feat-name-0") || $("featAdminGrid")) {
+    featuredCats = collectFeaturedCatsFromEditor();
+  }
+  featuredCats = normalizeFeaturedCats(featuredCats);
+  siteContent.featuredCats = featuredCats;
   saveDraft();
-  const payload = { categories: categories.slice(), products: products.map(normalizeProduct), siteContent: Object.assign({}, siteContent), featuredCats: normalizeFeaturedCats(featuredCats), updatedAt: new Date().toISOString() };
+  const payload = {
+    categories: categories.slice(),
+    products: products.map(normalizeProduct),
+    siteContent: Object.assign({}, siteContent, { featuredCats: featuredCats }),
+    featuredCats: featuredCats,
+    updatedAt: new Date().toISOString()
+  };
   if (btn) { btn.dataset.publishing = "1"; btn.disabled = true; btn.textContent = "جاري النشر…"; }
   setPublishStatus("جاري نشر المنتجات مباشرة… (" + products.length + " منتج)");
   try {
@@ -4321,9 +4362,12 @@ async function publishSite() {
       if (r.status === 401) { try { sessionStorage.removeItem(AUTH_KEY); } catch (e) {} throw new Error("انتهت جلسة الإدارة، سجّل الدخول مرة أخرى"); }
       throw new Error("فشل النشر (" + r.status + ")");
     }
-    setPublishStatus("✅ تم نشر المنتجات مباشرة — " + products.length + " منتج");
+    const featCount = featuredCats.filter(function(c){ return c && (c.name || c.image || c.cat); }).length;
+    setPublishStatus("✅ تم النشر — " + products.length + " منتج" + (featCount ? " · " + featCount + " تصنيفات مميزة" : ""));
     if (btn) btn.textContent = "✅ تم النشر مباشرة";
-    alert("✅ تم نشر المنتجات مباشرة\n\n" + products.length + " منتج متاح الآن للزوار.");
+    alert("✅ تم نشر المنتجات مباشرة\n\n" + products.length + " منتج" + (featCount ? "\n" + featCount + " تصنيفات مميزة" : "") + "\nمتاحة الآن للزوار.");
+    // re-load published catalog so local state matches server
+    try { await fetchPublished(); renderFeaturedCats(); } catch (e) {}
   } catch (err) {
     const msg = (err && err.message) ? err.message : "فشل النشر";
     setPublishStatus("❌ " + msg);
@@ -4334,11 +4378,12 @@ async function publishSite() {
   }
 }
 function exportProducts() {
+  const fc = normalizeFeaturedCats(featuredCats);
   const payload = {
     categories: categories.slice(),
     products: products.map(normalizeProduct),
-    siteContent: Object.assign({}, siteContent),
-    featuredCats: normalizeFeaturedCats(featuredCats),
+    siteContent: Object.assign({}, siteContent, { featuredCats: fc }),
+    featuredCats: fc,
     updatedAt: new Date().toISOString()
   };
   downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }), "khatem-backup.json");
