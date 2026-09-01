@@ -2024,64 +2024,52 @@ img {
 
 /* Featured category cards under filters */
 .featured-cats {
-  margin: 22px 0 6px;
-  padding: 0 2px;
+  margin: 22px 0 8px;
+  padding: 0;
+  width: 100%;
 }
 .featured-cats-title {
   text-align: center;
   font-size: 13px;
   font-weight: 600;
   color: var(--teal);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   letter-spacing: .02em;
 }
 .featured-cats-title .en { opacity: .65; font-weight: 500; }
 .featured-cats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-.featured-cat-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  gap: 12px;
+  width: 100%;
+}
+.featured-cat-card {
+  display: block;
+  width: 100%;
   padding: 0;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 16px;
   background: #fff;
   cursor: pointer;
   overflow: hidden;
   transition: transform .22s, box-shadow .22s, border-color .22s;
   box-shadow: var(--shadow-sm);
-  text-align: center;
+  text-align: right;
   font: inherit;
   color: inherit;
   -webkit-tap-highlight-color: transparent;
 }
 .featured-cat-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(201,182,114,.45);
+  transform: translateY(-2px);
+  border-color: rgba(201,182,114,.5);
   box-shadow: var(--shadow-md);
 }
-.featured-cat-card:active { transform: translateY(-1px) scale(.98); }
-.featured-cat-name {
-  order: -1;
-  width: 100%;
-  padding: 10px 8px 0;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--teal);
-  font-family: "Noto Naskh Arabic", serif;
-  line-height: 1.3;
-  min-height: 2.4em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.featured-cat-card:active { transform: translateY(0) scale(.995); }
 .featured-cat-img-wrap {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 16 / 7;
+  min-height: 110px;
+  max-height: 160px;
   background: linear-gradient(145deg, #e8e4dc, #ddd6c8);
   overflow: hidden;
   position: relative;
@@ -2093,16 +2081,40 @@ img {
   display: block;
   transition: transform .45s cubic-bezier(.2,.8,.3,1);
 }
-.featured-cat-card:hover .featured-cat-img-wrap img { transform: scale(1.06); }
+.featured-cat-card:hover .featured-cat-img-wrap img { transform: scale(1.05); }
 .featured-cat-img-wrap .ph {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; color: #999;
+  font-size: 13px; color: #999;
+}
+/* Name badge pasted on image corner */
+.featured-cat-name {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 2;
+  max-width: calc(100% - 24px);
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, rgba(1,18,32,.88), rgba(2,50,61,.82));
+  color: #f0e6b8;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: "Noto Naskh Arabic", serif;
+  line-height: 1.3;
+  letter-spacing: .01em;
+  box-shadow: 0 4px 16px rgba(0,0,0,.28), 0 0 0 1px rgba(201,182,114,.35);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .featured-cats.hidden { display: none !important; }
 @media (max-width: 420px) {
-  .featured-cats-grid { gap: 8px; }
-  .featured-cat-name { font-size: 12px; padding: 8px 4px 0; }
+  .featured-cats-grid { gap: 10px; }
+  .featured-cat-img-wrap { aspect-ratio: 16 / 8; min-height: 96px; max-height: 130px; }
+  .featured-cat-name { font-size: 12px; padding: 6px 12px; bottom: 8px; right: 8px; }
 }
 
 /* Admin featured cats editor */
@@ -3143,9 +3155,6 @@ function renderFeaturedCats() {
     btn.type = "button";
     btn.className = "featured-cat-card";
     btn.setAttribute("aria-label", c.name || ("تصنيف " + (idx + 1)));
-    const name = document.createElement("div");
-    name.className = "featured-cat-name";
-    name.textContent = c.name || "تصنيف";
     const imgWrap = document.createElement("div");
     imgWrap.className = "featured-cat-img-wrap";
     if (c.image) {
@@ -3169,7 +3178,10 @@ function renderFeaturedCats() {
       ph.textContent = "صورة";
       imgWrap.appendChild(ph);
     }
-    btn.appendChild(name);
+    const name = document.createElement("div");
+    name.className = "featured-cat-name";
+    name.textContent = c.name || "تصنيف";
+    imgWrap.appendChild(name);
     btn.appendChild(imgWrap);
     btn.addEventListener("click", function() {
       openFeaturedCategory(c);
