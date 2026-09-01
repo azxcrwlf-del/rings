@@ -2025,9 +2025,12 @@ img {
 
 /* Featured category cards under filters */
 .featured-cats {
-  margin: 22px 0 8px;
+  margin: 18px 0 14px;
   padding: 0;
   width: 100%;
+}
+.filter-actions-all {
+  margin-top: 4px;
 }
 .featured-cats-title {
   text-align: center;
@@ -2339,12 +2342,14 @@ img, video, iframe, canvas, svg {
         </details>
 
       </div>
+      <div class="filter-actions">
+        <button type="button" class="btn-primary" id="btnApplyFilter">عرض النتائج</button>
+      </div>
       <div class="featured-cats" id="featuredCats" style="display:none">
         <div class="featured-cats-title">تصنيفات مميزة <span class="en">Featured</span></div>
         <div class="featured-cats-grid" id="featuredCatsGrid"></div>
       </div>
-      <div class="filter-actions">
-        <button type="button" class="btn-primary" id="btnApplyFilter">عرض النتائج</button>
+      <div class="filter-actions filter-actions-all">
         <button type="button" class="btn-secondary" id="btnShowAll">عرض كل القطع</button>
       </div>
     </div>
@@ -2618,7 +2623,7 @@ img, video, iframe, canvas, svg {
     
     <div class="admin-card" id="featuredCatsEditor">
       <h2>تصنيفات مميزة <span class="en">Featured categories</span></h2>
-      <p class="admin-note">ثلاث بطاقات تظهر تحت الفلاتر وقبل زر «عرض كل القطع». الاسم فوق الصورة، والنقر يفتح منتجات التصنيف المرتبط. ارفع الصورة بنفس طريقة رفع صور المنتجات ثم احفظ المسودة وانشر.</p>
+      <p class="admin-note">ثلاث بطاقات تظهر تحت زر «عرض النتائج» وقبل زر «عرض كل القطع». الاسم فوق الصورة، والنقر يفتح منتجات التصنيف المرتبط. ارفع الصورة بنفس طريقة رفع صور المنتجات ثم احفظ المسودة وانشر.</p>
       <div class="feat-admin-grid" id="featAdminGrid"></div>
       <div class="site-content-actions" style="margin-top:14px">
         <span id="featCatsStatus">المسودة محلية حتى النشر</span>
@@ -3117,7 +3122,11 @@ function showContact() {
 }
 function handleRoute() {
   const h = location.hash;
-  if (h === "#admin") { openAdmin(); return; }
+  if (h === "#admin") {
+    if ($("admin") && $("admin").classList.contains("active") && isAdminAuthed()) return;
+    openAdmin();
+    return;
+  }
   if (h === "#filter" || h === "#shop") { goFilter(); return; }
   if (h === "#results") {
     renderResults(getFilteredProducts());
@@ -3205,7 +3214,12 @@ function openFeaturedCategory(c) {
   activeFilter.budgetMin = "";
   activeFilter.budgetMax = "";
   activeFilter.query = "";
-  activeFilter.cats = c.cat ? [c.cat] : [];
+  const linked = String(c && c.cat ? c.cat : "").trim();
+  if (!linked) {
+    alert("هذه البطاقة غير مربوطة بتصنيف. من لوحة الإدارة اختر «التصنيف المرتبط» ثم احفظ وانشر.");
+    return;
+  }
+  activeFilter.cats = [linked];
   const si = $("searchInput"); if (si) si.value = "";
   const si2 = $("searchInputResults"); if (si2) si2.value = "";
   const c1 = $("btnClearSearch"); if (c1) c1.style.display = "none";
@@ -3519,7 +3533,13 @@ function getFilteredProducts() {
       if (!name.includes(q) && !cat.includes(q)) return false;
     }
     if (activeFilter.showAll) return true;
-    if (activeFilter.cats.length && activeFilter.cats.indexOf(p.cat) < 0) return false;
+    if (activeFilter.cats.length) {
+      const pc = String(p.cat || "").trim();
+      // products with no category never match a selected category
+      if (!pc) return false;
+      const wanted = activeFilter.cats.map(function(x){ return String(x || "").trim(); }).filter(Boolean);
+      if (!wanted.some(function(w){ return w === pc; })) return false;
+    }
     if (activeFilter.weights.length && activeFilter.weights.indexOf(p.weight) < 0) return false;
     if (activeFilter.genders.length && !activeFilter.genders.some(g => p.gender === g || p.gender === "all")) return false;
     const price = parsePrice(p.price);
@@ -3968,27 +3988,39 @@ async function tryAdminLogin() {
     if (button) { button.dataset.authenticating = "0"; button.disabled = false; }
   }
 }
+let _enteringAdmin = false;
 async function enterAdmin() {
-  hideAdminGate();
-  hideAll();
-  const admin = $("admin");
-  if (admin) {
-    admin.style.display = "block";
-    admin.classList.add("active");
+  if (_enteringAdmin) return;
+  _enteringAdmin = true;
+  try {
+    hideAdminGate();
+    hideAll();
+    const admin = $("admin");
+    if (admin) {
+      admin.style.display = "block";
+      admin.classList.add("active");
+    }
+    // set hash without re-triggering a second enterAdmin via hashchange
+    if (location.hash !== "#admin") {
+      try { history.replaceState(null, "", location.pathname + location.search + "#admin"); }
+      catch (e) { location.hash = "#admin"; }
+    }
+    // Prefer local draft (includes unpublished adds); if empty, load server
+    let had = await loadDraft();
+    if (!had || !products.length) {
+      const ok = await fetchPublished();
+      if (!ok && !had) applyBaked();
+      await saveDraft();
+    }
+    resetEditor();
+    renderCatList();
+    renderAdminList();
+    renderSiteContentEditor();
+    renderFeaturedCatsEditor();
+    fillCatSelect();
+  } finally {
+    _enteringAdmin = false;
   }
-  if (location.hash !== "#admin") location.hash = "#admin";
-  const had = await loadDraft();
-  if (!had) {
-    const ok = await fetchPublished();
-    if (!ok) applyBaked();
-    saveDraft();
-  }
-  resetEditor();
-  renderCatList();
-  renderAdminList();
-  renderSiteContentEditor();
-  renderFeaturedCatsEditor();
-  fillCatSelect();
 }
 
 async function closeAdmin() {
@@ -4062,8 +4094,11 @@ function renderAdminList() {
     list.innerHTML = '<div class="admin-empty">لا توجد منتجات بعد</div>';
     return;
   }
-  products.forEach((p, idx) => {
-    p = normalizeProduct(p);
+  // newest first
+  const ordered = products.map(function(p, idx){ return { p: normalizeProduct(p), idx: idx }; }).slice().reverse();
+  ordered.forEach(function(entry) {
+    const p = entry.p;
+    const idx = entry.idx;
     const row = document.createElement("div");
     row.className = "admin-item";
     const thumbSrc = safeUrl(displayImg(p));
@@ -4309,7 +4344,7 @@ function editProduct(idx) {
   renderEditorSizes();
   $("productEditor").scrollIntoView({ behavior: "smooth" });
 }
-function saveProduct(e) {
+async function saveProduct(e) {
   e.preventDefault();
   const idx = parseInt($("ap-idx").value, 10);
   const item = normalizeProduct({
@@ -4327,12 +4362,23 @@ function saveProduct(e) {
     inStock: $("ap-instock").checked,
     sizes: editorSizes.slice()
   });
-  if (!item.name) return;
+  if (!item.name) {
+    alert("أدخل اسم المنتج");
+    return;
+  }
+  if (!item.cat) {
+    alert("اختر تصنيفاً للمنتج (نوع الحجر). بدون تصنيف لن يظهر ضمن بطاقات التصنيفات المميزة.");
+    // still allow save, but warn
+  }
   if (idx >= 0 && idx < products.length) products[idx] = item;
   else products.push(item);
-  saveDraft();
+  try { await saveDraft(); } catch (err) { console.warn(err); }
   resetEditor();
   renderAdminList();
+  fillCatSelect();
+  // scroll list into view so the new product is visible
+  const list = $("adminList");
+  if (list) list.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 async function publishSite() {
