@@ -469,15 +469,41 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 .filter-accordion>.hint{padding:10px 14px 0;margin:0}
 .filter-accordion>.size-grid,.filter-accordion>.cat-grid,.filter-accordion>.weight-grid,.filter-accordion>.gender-grid{padding:12px 14px 14px}
 .weight-grid,.gender-grid{display:flex;flex-wrap:wrap;gap:8px}
-.budget-split{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:12px 14px 14px}
-.budget-col{min-width:0}
-.budget-col-label{font-size:12px;font-weight:600;color:var(--teal);margin-bottom:8px;text-align:center}
-.budget-col-label .en{opacity:.65;font-weight:500}
-.budget-fields{display:grid;grid-template-columns:1fr;gap:6px}
-.budget-btn{width:100%;padding:10px 8px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;border-radius:8px;direction:ltr}
+.budget-pair{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  align-items:start;
+  grid-column:1 / -1; /* full width of filter grid when needed */
+}
+.budget-pair .budget-half{
+  min-width:0;
+  margin:0;
+}
+.budget-pair .budget-half > .group-label{
+  padding:11px 10px !important;
+  font-size:13px !important;
+  justify-content:center;
+  gap:6px;
+  text-align:center;
+}
+.budget-pair .budget-half > .group-label .en{
+  font-size:10px;
+  opacity:.7;
+}
+.budget-pair .budget-half > .hint{
+  padding:6px 10px 0 !important;
+  font-size:11px !important;
+  text-align:center;
+}
+.budget-fields{display:grid;grid-template-columns:1fr;gap:6px;padding:8px 10px 12px}
+.budget-btn{width:100%;padding:9px 6px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;border-radius:8px;direction:ltr}
 .budget-btn:hover{border-color:var(--gold);transform:translateY(-1px)}
 .budget-btn.selected{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 6px 14px rgba(10,42,36,.25)}
-@media(max-width:420px){.budget-split{grid-template-columns:1fr;gap:16px}}
+@media(max-width:420px){
+  .budget-pair{gap:6px}
+  .budget-pair .budget-half > .group-label{font-size:12px !important;padding:10px 6px !important}
+}
 
 .product-meta{font-size:12px;color:var(--muted);margin-top:5px}
 /* Product specs table */
@@ -2326,20 +2352,18 @@ img, video, iframe, canvas, svg {
           <p class="hint">اختر نطاق الوزن: كل 10 غ حتى 30 غ، أو أكثر من 30 غ.</p>
           <div class="weight-grid" id="filterWeights"></div>
         </details>
-        <details class="filter-group filter-accordion" id="filterBudgetGroup">
-          <summary class="group-label">الميزانية <span class="en">Budget</span></summary>
-          <p class="hint">اختر الحد الأدنى والحد الأقصى للسعر (من 10,000 دج وبزيادة 5,000 دج).</p>
-          <div class="budget-split">
-            <div class="budget-col">
-              <div class="budget-col-label">الحد الأدنى <span class="en">Min</span></div>
-              <div class="budget-fields" id="filterBudgetMin"></div>
-            </div>
-            <div class="budget-col">
-              <div class="budget-col-label">الحد الأقصى <span class="en">Max</span></div>
-              <div class="budget-fields" id="filterBudgetMax"></div>
-            </div>
-          </div>
-        </details>
+        <div class="budget-pair" id="filterBudgetGroup">
+          <details class="filter-group filter-accordion budget-half" id="filterBudgetMinGroup">
+            <summary class="group-label">الحد الأدنى <span class="en">Min</span></summary>
+            <p class="hint">من 10,000 دج (+5,000)</p>
+            <div class="budget-fields" id="filterBudgetMin"></div>
+          </details>
+          <details class="filter-group filter-accordion budget-half" id="filterBudgetMaxGroup">
+            <summary class="group-label">الحد الأقصى <span class="en">Max</span></summary>
+            <p class="hint">حتى 50,000+ دج</p>
+            <div class="budget-fields" id="filterBudgetMax"></div>
+          </details>
+        </div>
 
       </div>
       <div class="filter-actions">
