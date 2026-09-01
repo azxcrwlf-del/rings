@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
 <meta name="theme-color" content="#011220">
 <title>خاتم علي — أحجار كريمة وفضة أصلية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,7 +37,7 @@
   --r-lg:22px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{
   font-family:"Noto Naskh Arabic","Space Grotesk",system-ui,sans-serif;color:var(--ink);line-height:1.55;
   background:
@@ -468,10 +468,16 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 .filter-accordion>.hint{padding:10px 14px 0;margin:0}
 .filter-accordion>.size-grid,.filter-accordion>.cat-grid,.filter-accordion>.weight-grid,.filter-accordion>.gender-grid{padding:12px 14px 14px}
 .weight-grid,.gender-grid{display:flex;flex-wrap:wrap;gap:8px}
-.budget-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px 14px 14px}
-.budget-btn{width:100%;padding:11px 10px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;transition:.2s;border-radius:8px;direction:ltr}
+.budget-split{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:12px 14px 14px}
+.budget-col{min-width:0}
+.budget-col-label{font-size:12px;font-weight:600;color:var(--teal);margin-bottom:8px;text-align:center}
+.budget-col-label .en{opacity:.65;font-weight:500}
+.budget-fields{display:grid;grid-template-columns:1fr;gap:6px}
+.budget-btn{width:100%;padding:10px 8px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;border-radius:8px;direction:ltr}
 .budget-btn:hover{border-color:var(--gold);transform:translateY(-1px)}
 .budget-btn.selected{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 6px 14px rgba(10,42,36,.25)}
+@media(max-width:420px){.budget-split{grid-template-columns:1fr;gap:16px}}
+
 .product-meta{font-size:12px;color:var(--muted);margin-top:5px}
 /* Product specs table */
 .product-specs{
@@ -499,18 +505,19 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 }
 .admin-specs-grid label{display:block;font-size:12px;color:var(--muted)}
 .admin-specs-grid input,.admin-specs-grid select{
-  width:100%;margin-top:5px;border:1px solid var(--line);background:#fff;padding:11px;outline:0;border-radius:4px;font-family:inherit;
+  width:100%;margin-top:5px;border:1px solid var(--line);background:#fff;padding:11px;outline:0;border-radius:4px;font-family:inherit;font-size:16px;
 }
 .admin-specs-grid input:focus,.admin-specs-grid select:focus{border-color:var(--gold)}
 @media(max-width:520px){.admin-specs-grid{grid-template-columns:1fr}}
-@media(max-width:700px){.filter-groups-grid{grid-template-columns:1fr}.budget-fields{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.filter-groups-grid{grid-template-columns:1fr}}
+
 
 .size-btn{min-width:48px;padding:10px 14px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:.2s;border-radius:999px}
 .size-btn:hover{border-color:var(--gold);transform:translateY(-1px)}
 .size-btn.selected{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 6px 14px rgba(10,42,36,.25)}
 .form{display:grid;gap:14px;border-top:1px solid var(--line);padding-top:22px;margin-top:8px}
 .form label{font-size:13px;color:var(--muted);font-weight:500}
-.form input,.form select{width:100%;margin-top:7px;border:1px solid var(--line);background:#fff;padding:13px 14px;outline:0;font-family:inherit;border-radius:8px;transition:.2s}
+.form input,.form select{width:100%;margin-top:7px;border:1px solid var(--line);background:#fff;padding:13px 14px;outline:0;font-family:inherit;font-size:16px;border-radius:8px;transition:.2s}
 .form input:focus,.form select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,182,114,.12)}
 .form select{cursor:pointer;appearance:auto}
 .submit{background:var(--teal);color:#fff;padding:16px;font-size:14px;font-weight:600;margin-top:6px;border-radius:999px;transition:.25s;box-shadow:0 10px 22px rgba(10,42,36,.2)}
@@ -526,7 +533,7 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 .gate-box{background:var(--bg);max-width:360px;width:100%;padding:28px;border-radius:6px}
 .gate-box h2{font-size:20px;margin-bottom:8px;color:var(--teal)}
 .gate-box p{font-size:13px;color:var(--muted);margin-bottom:16px}
-.gate-box input{width:100%;border:1px solid var(--line);background:#fff;padding:13px;outline:0;margin-bottom:12px;border-radius:4px}
+.gate-box input{width:100%;border:1px solid var(--line);background:#fff;padding:13px;outline:0;margin-bottom:12px;border-radius:4px;font-size:16px}
 .gate-error{font-size:12px;color:#a00;margin-bottom:10px;display:none}
 .gate-actions{display:flex;gap:10px}
 .gate-actions button{flex:1;padding:13px;font-size:13px;border-radius:4px}
@@ -540,7 +547,7 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 .admin-card h2{font-size:14px;margin-bottom:16px;color:var(--muted)}
 .admin-form{display:grid;gap:12px}
 .admin-form label{font-size:12px;color:var(--muted)}
-.admin-form input,.admin-form select{width:100%;margin-top:5px;border:1px solid var(--line);background:#fff;padding:11px;outline:0;border-radius:4px;font-family:inherit}
+.admin-form input,.admin-form select{width:100%;margin-top:5px;border:1px solid var(--line);background:#fff;padding:11px;outline:0;border-radius:4px;font-family:inherit;font-size:16px}
 .admin-form input:focus,.admin-form select:focus{border-color:var(--gold)}
 .admin-form .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .admin-btn{background:var(--teal);color:#fff;padding:13px;font-size:13px;margin-top:4px;border-radius:4px;transition:.2s}
@@ -556,7 +563,7 @@ footer a:hover{color:var(--gold-light);text-decoration:underline;text-underline-
 .admin-item-actions button{font-size:12px;padding:6px 10px;border:1px solid var(--line);background:#fff;border-radius:3px}
 .admin-item-actions button.danger{color:#a00;border-color:#e0c0c0}
 .admin-empty{color:var(--muted);font-size:13px;padding:10px 0}
-.admin-note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}\n.site-content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}.site-content-grid label{display:block;font-size:12px;color:var(--muted)}.site-content-grid input,.site-content-grid textarea{width:100%;margin-top:7px;border:1px solid var(--line);background:#fff;padding:11px 12px;outline:0;border-radius:8px;font-family:inherit;resize:vertical}.site-content-grid input:focus,.site-content-grid textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,182,114,.12)}.site-content-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.site-content-actions button{padding:11px 16px;border-radius:4px;background:var(--teal);color:#fff;font-size:12px}.site-content-actions span{font-size:11px;color:var(--muted)}@media(max-width:520px){.site-content-grid{grid-template-columns:1fr}}\n
+.admin-note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}\n.site-content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}.site-content-grid label{display:block;font-size:12px;color:var(--muted)}.site-content-grid input,.site-content-grid textarea{width:100%;margin-top:7px;border:1px solid var(--line);background:#fff;padding:11px 12px;outline:0;border-radius:8px;font-family:inherit;font-size:16px;resize:vertical}.site-content-grid input:focus,.site-content-grid textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,182,114,.12)}.site-content-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.site-content-actions button{padding:11px 16px;border-radius:4px;background:var(--teal);color:#fff;font-size:12px}.site-content-actions span{font-size:11px;color:var(--muted)}@media(max-width:520px){.site-content-grid{grid-template-columns:1fr}}\n
 .badge-oos{display:inline-block;font-size:11px;background:#f5e0e0;color:#a00;padding:2px 7px;border-radius:3px;margin-right:6px}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line);background:#fff;font-size:13px;margin:3px 0 3px 4px;border-radius:4px}
 .chip.oos{opacity:.5}
@@ -603,6 +610,14 @@ html, body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+/* Prevent iOS auto-zoom on focus (needs >=16px on text fields) */
+input[type="text"], input[type="tel"], input[type="url"], input[type="password"],
+input[type="search"], input[type="email"], input[type="number"],
+input:not([type]), select, textarea {
+  font-size: 16px !important;
 }
 .nav-inner {
   max-width: 1100px;
@@ -1893,7 +1908,7 @@ img {
   border: 0;
   background: transparent;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--ink, #0a1620);
   outline: none;
   direction: rtl;
@@ -1952,7 +1967,7 @@ img {
   color: #f3f0e8;
 }
 @media (max-width: 600px) {
-  .search-bar input { font-size: 14px; padding: 13px 44px 13px 40px; }
+  .search-bar input { font-size: 16px; padding: 14px 48px 14px 44px; }
   .search-bar-wrap { margin-bottom: 20px; }
 }
 </style>
@@ -2068,9 +2083,19 @@ img {
         </details>
         <details class="filter-group filter-accordion" id="filterBudgetGroup">
           <summary class="group-label">الميزانية <span class="en">Budget</span></summary>
-          <p class="hint">اختر نطاق السعر، ابتداءً من 10,000 دج وبزيادة 5,000 دج لكل فئة.</p>
-          <div class="budget-fields" id="filterBudget"></div>
+          <p class="hint">اختر الحد الأدنى والحد الأقصى للسعر (من 10,000 دج وبزيادة 5,000 دج).</p>
+          <div class="budget-split">
+            <div class="budget-col">
+              <div class="budget-col-label">الحد الأدنى <span class="en">Min</span></div>
+              <div class="budget-fields" id="filterBudgetMin"></div>
+            </div>
+            <div class="budget-col">
+              <div class="budget-col-label">الحد الأقصى <span class="en">Max</span></div>
+              <div class="budget-fields" id="filterBudgetMax"></div>
+            </div>
+          </div>
         </details>
+
       </div>
       <div class="filter-actions">
         <button type="button" class="btn-primary" id="btnApplyFilter">عرض النتائج</button>
@@ -2481,21 +2506,17 @@ const IDB_STORE = "kv";
 const IDB_KEY = "appdata";
 const ALL_SIZES = ["51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76"];
 const ALL_WEIGHTS = ["0-10", "10-20", "20-30", "above30"];
-const ALL_BUDGETS = [
-  { min: 10000, max: 15000, label: "10,000 – 15,000 دج" },
-  { min: 15000, max: 20000, label: "15,000 – 20,000 دج" },
-  { min: 20000, max: 25000, label: "20,000 – 25,000 دج" },
-  { min: 25000, max: 30000, label: "25,000 – 30,000 دج" },
-  { min: 30000, max: 35000, label: "30,000 – 35,000 دج" },
-  { min: 35000, max: 40000, label: "35,000 – 40,000 دج" },
-  { min: 40000, max: 45000, label: "40,000 – 45,000 دج" },
-  { min: 45000, max: 50000, label: "45,000 – 50,000 دج" },
-  { min: 50000, max: null, label: "50,000+ دج" }
-];
+/* Budget steps: from 10,000 up by 5,000 — stop at 50,000 */
+const ALL_BUDGET_STEPS = [];
+for (let v = 10000; v <= 50000; v += 5000) ALL_BUDGET_STEPS.push(v);
+function formatBudgetDZ(n) {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " دج";
+}
+
 const WA_NUMBER = "213699069436";
 
 const defaultCategories = [];
-const defaultProducts = [{"cat": "", "name": "خاتم فضة نسائي رقيق", "price": "3200 دج", "images": [], "inStock": true, "sizes": [{"name": "15", "stock": true}, {"name": "16", "stock": true}, {"name": "17", "stock": true}, {"name": "18", "stock": true}]}];
+const defaultProducts = [];
 
 
     const defaultSiteContent = { landingEyebrow: "أصلي · فضة · حجر كريم", landingTag: "أحجار كريمة أصلية وخواتم فضة للرجال والنساء", landingTagEn: "Genuine stones & silver rings", landingBadge: "محمّدية مول · المحمّدية", landingBadgeEn: "Mohammedia Mall · Algiers", filterTitle: "اختر ما يناسبك", filterSubtitle: "حدّد المواصفات والميزانية لنعرض لك القطع المناسبة", filterSubtitleEn: "Choose size, weight and budget", locationTitle: "الموقع", locationBody: "محمّدية مول — المحل رقم 980\\nمركز تجاري وأعمال، المحمّدية 16000\\nبيع الأحجار الكريمة الأصلية ومجوهرات وخواتم رجالية ونسائية", locationEn: "Mohammedia Mall · Local n°980 · Algiers", contactTitle: "تواصل معنا", contactBody: "للاستفسار عن الأحجار أو المقاسات أو الطلبات الخاصة", contactEn: "Questions about stones, sizing or custom orders" };
@@ -2845,8 +2866,8 @@ function buildFilterUI() {
   const catBox = $("filterCats");
   const weightBox = $("filterWeights");
   const genderBox = $("filterGenders");
-  const budgetBox = $("filterBudget");
   if (!sizeBox) return;
+
   sizeBox.innerHTML = "";
   ALL_SIZES.forEach(sz => {
     const b = document.createElement("button");
@@ -2916,23 +2937,76 @@ function buildFilterUI() {
       genderBox.appendChild(b);
     });
   }
-  if (budgetBox) {
-    budgetBox.innerHTML = "";
-    ALL_BUDGETS.forEach(budget => {
+  const budgetMinBox = $("filterBudgetMin");
+  const budgetMaxBox = $("filterBudgetMax");
+  if (budgetMinBox) {
+    budgetMinBox.innerHTML = "";
+    // clear option
+    const clearMin = document.createElement("button");
+    clearMin.type = "button";
+    clearMin.className = "budget-btn" + (!activeFilter.budgetMin ? " selected" : "");
+    clearMin.textContent = "بدون حد";
+    clearMin.onclick = () => {
+      activeFilter.showAll = false;
+      activeFilter.budgetMin = "";
+      buildFilterUI();
+    };
+    budgetMinBox.appendChild(clearMin);
+    ALL_BUDGET_STEPS.forEach(val => {
       const b = document.createElement("button");
       b.type = "button";
-      b.className = "budget-btn" + (String(budget.min) === String(activeFilter.budgetMin) && (budget.max == null ? !activeFilter.budgetMax : String(budget.max) === String(activeFilter.budgetMax)) ? " selected" : "");
-      b.textContent = budget.label;
+      b.className = "budget-btn" + (String(val) === String(activeFilter.budgetMin) ? " selected" : "");
+      b.textContent = formatBudgetDZ(val);
       b.onclick = () => {
         activeFilter.showAll = false;
-        activeFilter.budgetMin = String(budget.min);
-        activeFilter.budgetMax = budget.max == null ? "" : String(budget.max);
+        activeFilter.budgetMin = String(val);
+        // if max is set and lower than new min, clear max
+        if (activeFilter.budgetMax && activeFilter.budgetMax !== "plus" && Number(activeFilter.budgetMax) < val) {
+          activeFilter.budgetMax = "";
+        }
         buildFilterUI();
       };
-      budgetBox.appendChild(b);
+      budgetMinBox.appendChild(b);
+    });
+  }
+  if (budgetMaxBox) {
+    budgetMaxBox.innerHTML = "";
+    const clearMax = document.createElement("button");
+    clearMax.type = "button";
+    clearMax.className = "budget-btn" + (!activeFilter.budgetMax ? " selected" : "");
+    clearMax.textContent = "بدون حد";
+    clearMax.onclick = () => {
+      activeFilter.showAll = false;
+      activeFilter.budgetMax = "";
+      buildFilterUI();
+    };
+    budgetMaxBox.appendChild(clearMax);
+    ALL_BUDGET_STEPS.forEach(val => {
+      const b = document.createElement("button");
+      const isPlus = val === 50000;
+      const selected = isPlus
+        ? activeFilter.budgetMax === "plus"
+        : String(val) === String(activeFilter.budgetMax);
+      const disabled = !isPlus && activeFilter.budgetMin && Number(activeFilter.budgetMin) > val;
+      b.type = "button";
+      b.className = "budget-btn" + (selected ? " selected" : "");
+      if (disabled) {
+        b.disabled = true;
+        b.style.opacity = "0.35";
+        b.style.pointerEvents = "none";
+      }
+      b.textContent = isPlus ? "50,000+ دج" : formatBudgetDZ(val);
+      b.onclick = () => {
+        activeFilter.showAll = false;
+        // 50,000+ = no upper ceiling
+        activeFilter.budgetMax = isPlus ? "plus" : String(val);
+        buildFilterUI();
+      };
+      budgetMaxBox.appendChild(b);
     });
   }
 }
+
 function productHasSize(p, sizes) {
   if (!sizes.length) return true;
   return (p.sizes || []).some(s => s.stock && sizes.indexOf(s.name) >= 0);
@@ -2941,7 +3015,8 @@ function getFilteredProducts() {
   const q = (activeFilter.query || "").trim().toLowerCase();
   if (activeFilter.showAll && !q) return products.slice();
   let minBudget = Number(activeFilter.budgetMin) || 0;
-  let maxBudget = Number(activeFilter.budgetMax) || 0;
+  // "plus" = 50,000+ → no upper limit
+  let maxBudget = (activeFilter.budgetMax === "plus") ? 0 : (Number(activeFilter.budgetMax) || 0);
   if (minBudget && maxBudget && minBudget > maxBudget) {
     const swap = minBudget; minBudget = maxBudget; maxBudget = swap;
   }
